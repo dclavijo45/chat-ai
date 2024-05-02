@@ -1,1 +1,67 @@
-/* You can add global styles to this file, and also import other style files */
+@font-face {
+    font-family: "soehne-semibold";
+    src: url("/assets/fonts/soehne-semibold.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "soehne-book";
+    src: url("/assets/fonts/soehne-book.woff2") format("woff2");
+}
+
+* {
+    font-family: soehne-book, ui-sans-serif, system-ui, -apple-system,
+        "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif,
+        "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+}
+
+:root {
+    --bg-color-1-dark: #212121;
+    --bg-color-2-dark: #383838;
+    --color-1-dark: rgb(229, 229, 229);
+    --color-2-dark: rgb(236, 236, 236);
+    --input-user-color-dark: whitesmoke;
+    --color-3-dark: #171717;
+
+    --bg-color-1: #efefef;
+    --bg-color-2: #f5f5f5;
+    --color-1: rgb(150, 150, 150);
+    --color-2: rgb(170, 170, 170);
+    --input-user-color: #f8f8f8;
+    --color-3: #f9f9f9;
+}
+
+i.material-icons-outlined {
+    vertical-align: -6px;
+}
+
+.scroll-1::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+
+.scroll-1::-webkit-scrollbar:vertical {
+    width: 8px;
+}
+
+.scroll-1::-webkit-scrollbar-button:increment::-webkit-scrollbar-button {
+    display: none;
+}
+
+.scroll-1::-webkit-scrollbar:horizontal {
+    height: 10px;
+}
+
+.scroll-1::-webkit-scrollbar-thumb {
+    background-color: var(--bg-color-2);
+    border-radius: 9999px;
+}
+
+.scroll-1::-webkit-scrollbar-track {
+    background-color: transparent;
+}

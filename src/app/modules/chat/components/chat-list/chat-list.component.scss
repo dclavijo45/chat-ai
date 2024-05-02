@@ -1,0 +1,140 @@
+main {
+    padding: 1rem 0.7rem;
+    height: 100%;
+    background-color: var(--color-3);
+    transition: background-color 100ms ease-in-out;
+}
+
+main.dark {
+    background-color: var(--color-3-dark);
+}
+
+.new-chat {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 43px 1fr 1fr;
+    height: 43px;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    background-color: transparent;
+    border-radius: 0.5rem;
+    transition: background-color 100ms ease-in-out;
+}
+
+.new-chat.dark {
+    background-color: var(--bg-color-1-dark);
+}
+
+.new-chat:hover {
+    cursor: pointer;
+    background-color: #ececec;
+}
+
+.new-chat.dark:hover {
+    background-color: #2f2f2f;
+}
+
+.logo {
+    width: max-content;
+}
+
+.text-new {
+    justify-self: start;
+    width: max-content;
+    font-size: 14px;
+}
+
+.text-new.dark {
+    color: var(--color-2);
+}
+
+.add-icon {
+    justify-self: end;
+    width: max-content;
+    font-size: 20px;
+}
+
+.add-icon.dark {
+    color: var(--color-2);
+}
+
+.chat-list {
+    padding-left: 0.4rem;
+    margin-top: 1.5rem;
+    font-size: 14px;
+    overflow-y: auto;
+    height: 79vh;
+}
+
+.chat-list-title {
+    display: block;
+    font-size: 0.8rem;
+    font-family: soehne-semibold;
+    margin-bottom: 0.5rem;
+}
+
+.chat-list-title.dark {
+    color: var(--color-2);
+}
+
+.chat-element {
+    padding-block: 0.6rem;
+    margin-bottom: 0.2rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 0.5rem;
+    transition: background-color 100ms ease-in-out;
+    transition: color 100ms ease-in-out;
+}
+
+.chat-element.dark {
+    color: var(--color-2);
+}
+
+.chat-element.light {
+    color: rgb(13, 13, 13);
+}
+
+.chat-element.active {
+    background-color: #ececec;
+    transition: background-color 100ms ease-in-out;
+}
+
+.chat-element.active.dark {
+    background-color: var(--bg-color-1-dark);
+}
+
+.chat-element:hover {
+    cursor: pointer;
+    background-color: var(--bg-color-1);
+}
+
+.chat-element.dark:hover {
+    background-color: var(--bg-color-1-dark);
+}
+
+.theme-color {
+    margin-top: 1rem;
+}
+
+.theme-color-icon {
+    font-size: 30px;
+    color: #2f2f2f;
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 9999px;
+    transition: background-color 100ms ease-in-out;
+}
+
+.theme-color-icon.dark {
+    color: whitesmoke;
+}
+
+.theme-color-icon:hover {
+    background-color: #ececec;
+}
+
+.theme-color-icon.dark:hover {
+    background-color: #2f2f2f;
+}

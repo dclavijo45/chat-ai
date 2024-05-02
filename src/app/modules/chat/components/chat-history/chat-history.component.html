@@ -1,0 +1,41 @@
+<main [class.dark]="(themeColor | async) == 'dark'">
+    <div class="chat-list">
+        <div #historyList class="history-list scroll-1">
+            @for (chat of chatHistory().history; track $index) {
+                <div class="chat-element">
+                    @switch (chat.role) {
+                        @case ('user') {
+                            <img class="chat-element-img" src="/assets/img/user.png" alt="user photo" width="34" height="34">
+                        }
+
+                        @case ('model') {
+                            <img class="chat-element-img" src="/assets/img/logo.png" alt="Logo chat-ai" width="34" height="34">
+                        }
+                    }
+
+                    <p class="chat-element-text" [class.dark]="(themeColor | async) == 'dark'">
+                        {{ chatHistory().history | toggleChunkChat : $index : chat : chatChunkStream() }}
+                    </p>
+                </div>
+            }
+        </div>
+
+        @if (chatHistory().history.length == 0) {
+            <div class="start">
+                <img class="logo" src="/assets/img/logo.gif" alt="Logo chat-ai" width="34" height="34">
+                <h2 class="title" [class.dark]="(themeColor | async) == 'dark'">¿En que puedo ayudarte
+                    hoy?</h2>
+            </div>
+        }
+    </div>
+
+    <div class="input-user" [class.dark]="(themeColor | async) == 'dark'">
+        <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"
+            [class.dark]="(themeColor | async) == 'dark'" placeholder="Envía un mensaje..."
+            class="scroll-1" autofocus></textarea>
+
+        <i class="material-icons-outlined send-icon" (click)="sendMessage($event)"
+            [class.active]="userInputPrompt.valid"
+            [class.dark]="(themeColor | async) == 'dark'">arrow_upward</i>
+    </div>
+</main>

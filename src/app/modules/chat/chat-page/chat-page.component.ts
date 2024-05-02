@@ -1,0 +1,24 @@
+import { Component, ElementRef, ViewChild } from '@angular/core';
+
+import { ChatHeaderComponent } from '../components/chat-header/chat-header.component';
+import { ChatHistoryComponent } from '../components/chat-history/chat-history.component';
+import { ChatListComponent } from '../components/chat-list/chat-list.component';
+
+@Component({
+  selector: 'chat-page',
+  standalone: true,
+  imports: [ChatHeaderComponent, ChatListComponent, ChatHistoryComponent],
+  templateUrl: './chat-page.component.html',
+  styleUrl: './chat-page.component.scss'
+})
+export class ChatPageComponent {
+    constructor() {
+        this.toggleChatList = false;
+    }
+
+    toggleChatList: boolean;
+
+    toggleChatListM(): void {
+        this.toggleChatList = !this.toggleChatList;
+    }
+}

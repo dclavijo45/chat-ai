@@ -1,0 +1,36 @@
+main {
+    display: grid;
+    height: 100%;
+    transition: background-color 100ms ease-in-out;
+}
+
+main.dark {
+    background-color: var(--bg-color-1-dark);
+}
+
+i {
+    display: none;
+    color: var(--color-1);
+    margin-top: 0.2rem;
+    font-size: 35px;
+    padding: 0.5rem;
+    width: max-content;
+    height: max-content;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 150ms ease-in-out;
+}
+
+i.active-m {
+    margin-left: 16.5rem;
+}
+
+i:hover {
+    background-color: rgba(229, 229, 229, 0.1);
+}
+
+@media (max-width: 768px) {
+    i {
+        display: block;
+    }
+}

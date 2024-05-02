@@ -1,0 +1,47 @@
+main {
+    display: grid;
+    grid-template-areas:
+        "chat_list chat_header"
+        "chat_list chat_history";
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: 50px 1fr;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+}
+
+chat-list {
+    grid-area: chat_list;
+    transition: width 300ms ease-in-out;
+}
+
+chat-history {
+    grid-area: chat_history;
+}
+
+chat-header {
+    grid-area: chat_header;
+}
+
+@media (max-width: 768px) {
+    main {
+        grid-template-areas:
+        "chat_header"
+        "chat_history";;
+        grid-template-columns: 1fr;
+    }
+
+    chat-list {
+        position: absolute;
+        z-index: -1;
+        width: 0px;
+        height: 100vh;
+        opacity: 0;
+    }
+
+    chat-list.active-m {
+        opacity: 1;
+        width: 260px;
+        z-index: 1;
+    }
+}

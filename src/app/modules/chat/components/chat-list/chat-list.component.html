@@ -1,0 +1,24 @@
+<main [class.dark]="(themeColor | async) == 'dark'">
+    <div class="new-chat" [class.dark]="(themeColor | async) == 'dark'" (click)="addChat()">
+        <img class="logo" src="/assets/img/logo.png" alt="Logo chat-ai" width="30" height="30">
+        <span class="text-new" [class.dark]="(themeColor | async) == 'dark'">Nuevo chat</span>
+        <i class="material-icons-outlined add-icon" [class.dark]="(themeColor | async) == 'dark'">add</i>
+    </div>
+
+    <div class="chat-list scroll-1">
+        <span class="chat-list-title" [class.dark]="(themeColor | async) == 'dark'">Chats</span>
+
+        <div *ngFor="let chat of chatList()" class="chat-element" [class.dark]="(themeColor | async) == 'dark'"
+            [class.light]="(themeColor | async) == 'light'" [class.active]="chatSelected() == chat.id"
+            (click)="selectChat(chat.id)">
+            {{ chat.id }}
+        </div>
+    </div>
+
+    <div class="theme-color">
+        <i class="material-icons-outlined theme-color-icon" [class.dark]="(themeColor | async) == 'dark'"
+            (click)="toggleThemeColor()">{{
+            (themeColor | async) ==
+            'light' ? 'dark_mode' : 'light_mode' }}</i>
+    </div>
+</main>
