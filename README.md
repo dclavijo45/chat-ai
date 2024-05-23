@@ -1,7 +1,7 @@
 Chat AI using Google Gemini and OpenAi API switchable
 =======
 
-Angular 17 and NodeJS with Express has been used for build the project
+Angular 18 and NodeJS with Express has been used for build the project
 
 Requirements:
 ---------------
