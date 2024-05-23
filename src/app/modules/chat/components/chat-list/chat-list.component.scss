@@ -3,6 +3,7 @@ main {
     height: 100%;
     background-color: var(--color-3);
     transition: background-color 100ms ease-in-out;
+    user-select: none;
 }
 
 main.dark {
@@ -12,7 +13,7 @@ main.dark {
 .new-chat {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 43px 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     height: 43px;
     align-items: center;
     padding: 0.2rem 0.5rem;
@@ -25,27 +26,55 @@ main.dark {
     background-color: var(--bg-color-1-dark);
 }
 
-.new-chat:hover {
-    cursor: pointer;
-    background-color: #ececec;
-}
-
-.new-chat.dark:hover {
-    background-color: #2f2f2f;
+.ai-logos {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
 }
 
 .logo {
     width: max-content;
+    transition: filter 100ms ease-in-out;
+    transition: box-shadow 100ms ease-in-out;
+    border-radius: 5px;
+    filter: grayscale(1);
+}
+
+.logo:hover {
+    cursor: pointer;
+    filter: brightness(90%);
+}
+
+.logo.active {
+    border: dashed 1px #2f2f2f;
+    filter: grayscale(0);
+}
+
+.logo.active.dark {
+    border: dashed 1px #ececec;
 }
 
 .text-new {
     justify-self: start;
     width: max-content;
     font-size: 14px;
+    padding: 0.3rem;
+    border-radius: 0.5rem;
+    transition: background-color 100ms ease-in-out;
 }
 
 .text-new.dark {
     color: var(--color-2);
+}
+
+.text-new:hover {
+    cursor: pointer;
+    background-color: #ececec;
+}
+
+.text-new.dark:hover {
+    background-color: #2f2f2f;
 }
 
 .add-icon {

@@ -16,15 +16,14 @@ import {
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-import { ChatService } from '../../services/chat.service';
 import { CommonModule } from '@angular/common';
-import { IChat } from '../../interfaces/chat.model';
-import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
-import { ThemeColorService } from '../../../../shared/services/theme-color.service';
-import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
+import { IChat } from '../../interfaces/chat.model';
+import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
+import { ChatService } from '../../services/chat.service';
 
 @Component({
     selector: 'chat-history',
@@ -34,6 +33,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
         FormsModule,
         ReactiveFormsModule,
         ToggleChunkChatPipe,
+        ThemeColorDirective,
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
@@ -41,10 +41,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 })
 export class ChatHistoryComponent implements OnInit, OnDestroy {
     constructor() {
-        this.themeColorService = inject(ThemeColorService);
-
         this.userInputPrompt = new FormControl<string | null>('', [
-            Validators.required
+            Validators.required,
         ]);
 
         this.chatService = inject(ChatService);
@@ -71,17 +69,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
     private isStreaming: boolean;
 
-    themeColorService: ThemeColorService;
-
     chatHistory: WritableSignal<IChat>;
 
     chatChunkStream: Signal<string>;
 
     userInputPrompt: FormControl<string | null>;
-
-    get themeColor(): Observable<ThemeColorEnum> {
-        return this.themeColorService.themeColor;
-    }
 
     ngOnInit(): void {
         this.$destroy.add(

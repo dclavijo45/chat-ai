@@ -1,23 +1,30 @@
-<main [class.dark]="(themeColor | async) == 'dark'">
-    <div class="new-chat" [class.dark]="(themeColor | async) == 'dark'" (click)="addChat()">
-        <img class="logo" src="/assets/img/logo.png" alt="Logo chat-ai" width="30" height="30">
-        <span class="text-new" [class.dark]="(themeColor | async) == 'dark'">Nuevo chat</span>
-        <i class="material-icons-outlined add-icon" [class.dark]="(themeColor | async) == 'dark'">add</i>
+<main themeColor>
+    <div class="new-chat" themeColor>
+        <span class="text-new" (click)="addChat()" themeColor>Nuevo chat <i class="material-icons-outlined add-icon"
+                themeColor>add</i></span>
+
+        <div class="ai-logos">
+            <img class="logo" [class.active]="aiEngine() == 'openai'" src="/assets/img/chat-gpt-logo.png"
+                alt="Logo chat gpt" width="30" height="30" title="ChatGPT" (click)="setEngine(aiEngineEnum.openai)"
+                themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == 'gemini'" src="/assets/img/gemini-logo.png"
+                alt="Logo gemini" width="30" height="30" title="Gemini" (click)="setEngine(aiEngineEnum.gemini)"
+                themeColor>
+        </div>
     </div>
 
     <div class="chat-list scroll-1">
-        <span class="chat-list-title" [class.dark]="(themeColor | async) == 'dark'">Chats</span>
+        <span class="chat-list-title" themeColor>Chats</span>
 
-        <div *ngFor="let chat of chatList()" class="chat-element" [class.dark]="(themeColor | async) == 'dark'"
-            [class.light]="(themeColor | async) == 'light'" [class.active]="chatSelected() == chat.id"
-            (click)="selectChat(chat.id)">
+        <div *ngFor="let chat of chatList()" class="chat-element" [class.active]="chatSelected() == chat.id"
+            (click)="selectChat(chat.id)" themeColor>
             {{ chat.id }}
         </div>
     </div>
 
     <div class="theme-color">
-        <i class="material-icons-outlined theme-color-icon" [class.dark]="(themeColor | async) == 'dark'"
-            (click)="toggleThemeColor()">{{
+        <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()" themeColor>{{
             (themeColor | async) ==
             'light' ? 'dark_mode' : 'light_mode' }}</i>
     </div>

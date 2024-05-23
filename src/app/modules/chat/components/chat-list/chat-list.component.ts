@@ -13,11 +13,13 @@ import { Observable } from 'rxjs';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
 import { ThemeColorService } from '../../../../shared/services/theme-color.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AiEngineEnum } from '../../enums/ai-engine.enum';
+import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 
 @Component({
     selector: 'chat-list',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, ThemeColorDirective],
     templateUrl: `./chat-list.component.html`,
     styleUrl: './chat-list.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +36,12 @@ export class ChatListComponent implements OnInit {
         this.chatSelected = toSignal(this.chatService.chatSelect, {
             initialValue: '',
         });
+
+        this.aiEngine = toSignal(this.chatService.aiEngine, {
+            initialValue: AiEngineEnum.openai,
+        });
+
+        this.aiEngineEnum = AiEngineEnum;
     }
 
     private chatService: ChatService;
@@ -43,6 +51,10 @@ export class ChatListComponent implements OnInit {
     chatList: Signal<IChat[]>;
 
     chatSelected: Signal<string>;
+
+    aiEngine: Signal<AiEngineEnum>;
+
+    aiEngineEnum: typeof AiEngineEnum;
 
     get themeColor(): Observable<ThemeColorEnum> {
         return this.themeColorService.themeColor;
@@ -72,5 +84,9 @@ export class ChatListComponent implements OnInit {
 
     toggleThemeColor(): void {
         this.themeColorService.toggleThemeColor();
+    }
+
+    setEngine(engine: AiEngineEnum): void {
+        this.chatService.setAiEngine(engine)
     }
 }

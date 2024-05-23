@@ -5,6 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { IChat } from '../interfaces/chat.model';
 import { environment } from '../../../../environments/environtment';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AiEngineEnum } from '../enums/ai-engine.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -19,15 +20,20 @@ export class ChatService {
 
         this.dispathChatSelect = signal('');
         this.chatSelect = toObservable(this.dispathChatSelect);
+
+        this.dispatchAiEngine = signal(AiEngineEnum.openai);
+        this.aiEngine = toObservable(this.dispatchAiEngine);
     }
 
     private dispathChatChunk: Subject<string>;
     private dispathChatList: WritableSignal<IChat[]>;
     private dispathChatSelect: WritableSignal<string>;
+    private dispatchAiEngine: WritableSignal<AiEngineEnum>;
 
     chatChunkStream: Observable<string>;
     chatList: Observable<IChat[]>;
     chatSelect: Observable<string>;
+    aiEngine: Observable<AiEngineEnum>;
 
     /**
      * Select a chat by chat id
@@ -36,6 +42,15 @@ export class ChatService {
      */
     selectChat(chatId: string): void {
         this.dispathChatSelect.set(chatId);
+    }
+
+    /**
+     * Select a ai engine
+     *
+     * @param engine AI engine enum selected
+     */
+    setAiEngine(engine: AiEngineEnum): void {
+        this.dispatchAiEngine.set(engine);
     }
 
     /**
@@ -95,7 +110,7 @@ export class ChatService {
 
             try {
                 const response = await fetch(
-                    `${environment.backend_url}/chat/start`,
+                    `${environment.backend_url}/${this.dispatchAiEngine()}/chat/start`,
                     {
                         method: 'POST',
                         body: JSON.stringify({
@@ -190,7 +205,7 @@ export class ChatService {
 
             try {
                 const response = await fetch(
-                    `${environment.backend_url}/chat/conversation`,
+                    `${environment.backend_url}/${this.dispatchAiEngine()}/chat/conversation`,
                     {
                         method: 'POST',
                         body: JSON.stringify({
