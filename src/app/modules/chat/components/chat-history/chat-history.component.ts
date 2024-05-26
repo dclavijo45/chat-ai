@@ -1,5 +1,6 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     ElementRef,
     OnDestroy,
@@ -22,8 +23,15 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { IChat } from '../../interfaces/chat.model';
+import {
+    IHRole,
+    PartHistory,
+    TypePartEnum,
+} from '../../interfaces/history.model';
+import { IChatImage } from '../../interfaces/image.model';
 import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
+import { NotifyService } from '../../../../shared/services/notify.service';
 
 @Component({
     selector: 'chat-history',
@@ -46,6 +54,8 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         ]);
 
         this.chatService = inject(ChatService);
+        this.cdr = inject(ChangeDetectorRef);
+        this.notifyService = inject(NotifyService);
 
         this.chatHistory = signal({
             history: [],
@@ -59,6 +69,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.$destroy = new Subscription();
 
         this.isStreaming = false;
+
+        this.imagesList = signal([]);
+
+        this.TypePartEnum = TypePartEnum;
+        this.IHRole = IHRole;
     }
 
     @ViewChild('historyList') historyList!: ElementRef<HTMLDivElement>;
@@ -69,11 +84,21 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
     private isStreaming: boolean;
 
+    private cdr: ChangeDetectorRef;
+
+    private notifyService: NotifyService;
+
     chatHistory: WritableSignal<IChat>;
 
     chatChunkStream: Signal<string>;
 
     userInputPrompt: FormControl<string | null>;
+
+    imagesList: WritableSignal<IChatImage[]>;
+
+    TypePartEnum: typeof TypePartEnum;
+
+    IHRole: typeof IHRole;
 
     ngOnInit(): void {
         this.$destroy.add(
@@ -144,16 +169,36 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
         this.isStreaming = true;
 
-        const userPrompt = JSON.parse(
+        const userPrompt: string = JSON.parse(
             JSON.stringify(this.userInputPrompt.value)
         );
 
         this.userInputPrompt.reset();
 
+        const parts: PartHistory[] = [];
+
+        if (this.imagesList().length) {
+            for (const image of this.imagesList()) {
+                const partImage: PartHistory = {
+                    text: image.base64,
+                    type: TypePartEnum.image,
+                };
+
+                parts.push(partImage);
+            }
+        }
+
+        parts.push({
+            type: TypePartEnum.text,
+            text: userPrompt,
+        });
+
+        this.imagesList.set([]);
+
         if (this.chatHistory().history.length) {
-            await this.chatService.conversation(userPrompt.trim());
+            await this.chatService.conversation(parts);
         } else {
-            await this.chatService.startChat(userPrompt.trim());
+            await this.chatService.startChat(parts);
         }
 
         this.isStreaming = false;
@@ -164,5 +209,72 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
             this.historyList.nativeElement.scrollTop =
                 this.historyList.nativeElement.scrollHeight;
         }, 100);
+    }
+
+    async selectFiles(e: any): Promise<void> {
+        const files = e.target.files as File[];
+        const maxFileSize = 1 * 1024 * 1024; // 1MB
+        const maxFiles = 10;
+
+        if (!files.length) return;
+
+        if (files.length > maxFiles) {
+            this.notifyService.error(`Solo se permiten máximo ${maxFiles} imágenes`);
+            return;
+        }
+
+        const reader = new FileReader();
+
+        for (const file of files) {
+            if (file.size > maxFileSize) {
+                this.notifyService.error(
+                    `La imagen ${file.name} supera el tamaño máximo (${
+                        maxFileSize / 1024 / 1024
+                    }MB)`
+                );
+                continue;
+            }
+
+            await new Promise<void>((resolve) => {
+                reader.onload = (er) => {
+                    if (
+                        er?.target?.result &&
+                        typeof er?.target?.result == 'string'
+                    ) {
+                        if (
+                            !this.imagesList().find(
+                                (img) => img.name == file.name
+                            )
+                        ) {
+                            this.imagesList.update((imgList) => {
+                                imgList.push({
+                                    base64: er!.target!.result as string,
+                                    name: file.name,
+                                });
+                                return imgList;
+                            });
+                        }
+                    }
+
+                    resolve();
+                };
+
+                reader.onerror = () => resolve();
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        e.target.value = '';
+
+        this.cdr.detectChanges();
+    }
+
+    removeImage(image: IChatImage): void {
+        this.imagesList.update((imgList) => {
+            imgList = imgList.filter((img) => img.name != image.name);
+
+            return imgList;
+        });
     }
 }

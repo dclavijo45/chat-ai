@@ -73,19 +73,73 @@ main.dark {
     color: var(--color-2-dark);
 }
 
+.chat-element-img-user {
+    margin-top: 1rem;
+}
+
 .input-user {
     display: grid;
     grid-area: input_user;
     align-self: baseline;
     grid-template-rows: 1fr;
-    grid-template-columns: 1fr 40px;
+    gap: 5px;
     padding: 1rem;
-    gap: 10px;
     width: 700px;
     border: 1px solid rgb(155, 155, 155);
     border-radius: 1rem;
     min-height: 50px;
     transition: border-color 100ms ease-in-out;
+}
+
+.input-user.images{
+    // grid-template-rows: 50px 1fr;
+    grid-template-rows: repeat(auto-fill, minmax(50px, 1fr));
+}
+
+.list-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 5px;
+    max-height: 55px;
+    overflow-y: auto;
+}
+
+.image-selected-box {
+    display: grid;
+    position: relative;
+}
+
+.image-selected {
+    border-radius: 5px;
+    transition: filter 100ms ease-in-out;
+}
+
+.delete-image-icon {
+    z-index: -1;
+    position: absolute;
+    color: red;
+    margin-left: -6px;
+    align-self: center;
+    justify-self: center;
+    cursor: pointer;
+}
+
+.image-selected-box:hover .image-selected {
+    filter: brightness(70%);
+}
+
+.image-selected-box:hover .delete-image-icon {
+    z-index: 1;
+}
+
+.input-manage {
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    gap: 10px;
+}
+
+.input-manage.images {
+    margin-top: 1rem;
 }
 
 .input-user.dark {
@@ -110,7 +164,7 @@ textarea.dark {
     color: var(--input-user-color-dark);
 }
 
-.send-icon {
+.input-icon {
     color: var(--black-1);
     background-color: #e5e5e5;
     width: max-content;
@@ -124,24 +178,42 @@ textarea.dark {
     transition: background-color 100ms ease-in-out;
 }
 
-.send-icon.dark {
+.input-icon.dark {
     background-color: var(--bg-color-2-dark);
 }
 
-.send-icon.active {
+.input-icon.active {
     background-color: black;
     color: white;
     transition: background-color 100ms ease-in-out;
     transition: color 100ms ease-in-out;
 }
 
-.send-icon.active.dark {
+.input-icon.active.dark {
     background-color: white;
     color: black;
 }
 
-.send-icon.active:hover {
+.input-icon.active:hover {
     cursor: pointer;
+}
+
+.select-files-icon {
+    justify-self: center;
+    align-self: end;
+    cursor: pointer;
+}
+
+.select-files-icon.dark {
+    background-color: white;
+    color: black;
+}
+
+input[type=file] {
+    visibility: hidden;
+    position: fixed;
+    height: 0;
+    width: 0;
 }
 
 @media (max-width: 1000px) {

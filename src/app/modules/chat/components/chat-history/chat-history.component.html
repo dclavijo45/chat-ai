@@ -1,22 +1,27 @@
 <main themeColor>
     <div class="chat-list">
         <div #historyList class="history-list scroll-1">
-            @for (chat of chatHistory().history; track $index) {
-                <div class="chat-element">
-                    @switch (chat.role) {
-                        @case ('user') {
-                            <img class="chat-element-img" src="/assets/img/user.png" alt="user photo" width="34" height="34">
-                        }
+            @for (chat of chatHistory().history; track $index; let indexHistory = $index) {
+                @for (part of chat.parts; track $index) {
+                    <div class="chat-element">
+                        <img class="chat-element-img"
+                            src="/assets/img/{{chat.role == IHRole.user ? 'user' : 'logo'}}.png"
+                            alt="user photo" width="34" height="34">
 
-                        @case ('model') {
-                            <img class="chat-element-img" src="/assets/img/logo.png" alt="Logo chat-ai" width="34" height="34">
-                        }
-                    }
+                        @switch (part.type) {
+                            @case (TypePartEnum.image) {
+                                <img class="chat-element-img-user"
+                                    [src]="part.text" alt="Img selected by user" width="150">
+                            }
 
-                    <p class="chat-element-text" themeColor>
-                        {{ chatHistory().history | toggleChunkChat : $index : chat : chatChunkStream() }}
-                    </p>
-                </div>
+                            @case (TypePartEnum.text) {
+                                <p class="chat-element-text" themeColor>
+                                    {{ chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream() }}
+                                </p>
+                            }
+                        }
+                    </div>
+                }
             }
         </div>
 
@@ -29,13 +34,30 @@
         }
     </div>
 
-    <div class="input-user" themeColor>
-        <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"
-            placeholder="Envía un mensaje..."
-            class="scroll-1" themeColor autofocus></textarea>
+    <div class="input-user" [class.images]="imagesList().length" themeColor>
+        <div class="list-images scroll-1">
+            @for (image of imagesList(); track $index) {
+                <div class="image-selected-box" (click)="removeImage(image)">
+                    <img class="image-selected"
+                        [src]="image.base64" [alt]="'Image selected by user: ' + image.name"
+                        width="45" height="45">
+                    <i class="material-icons-outlined delete-image-icon">delete</i>
+                </div>
+            }
+        </div>
 
-        <i class="material-icons-outlined send-icon" (click)="sendMessage($event)"
-            [class.active]="userInputPrompt.valid"
-            themeColor>arrow_upward</i>
+        <div class="input-manage" [class.images]="imagesList().length">
+            <i class="material-icons-outlined input-icon select-files-icon" (click)="inputFile.click()"
+                [class.active]="userInputPrompt.valid" themeColor>add_photo_alternate</i>
+
+            <input #inputFile type="file" (change)="selectFiles($event)" accept=".png, .jpeg, .jpg, .webp, .gif"
+                multiple>
+
+            <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"
+                placeholder="Envía un mensaje..." class="scroll-1" themeColor autofocus></textarea>
+
+            <i class="material-icons-outlined input-icon" (click)="sendMessage($event)"
+                [class.active]="userInputPrompt.valid" themeColor>arrow_upward</i>
+        </div>
     </div>
 </main>

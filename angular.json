@@ -24,7 +24,7 @@
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
                         "assets": ["src/favicon.ico", "src/assets", "src/robots.txt"],
-                        "styles": ["src/styles.scss"],
+                        "styles": ["src/styles.scss", "node_modules/simple-notify/dist/simple-notify.css"],
                         "scripts": [],
                         "server": "src/main.server.ts",
                         "prerender": true,

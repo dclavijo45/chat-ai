@@ -1,6 +1,6 @@
 export interface IHistory {
     role: IHRole,
-    parts: Part[]
+    parts: PartHistory[]
 }
 
 export enum IHRole {
@@ -8,6 +8,12 @@ export enum IHRole {
     model = 'model'
 }
 
-interface Part {
+export interface PartHistory {
+    type: TypePartEnum
     text: string
+}
+
+export enum TypePartEnum {
+    text = 'text',
+    image = 'image'
 }

@@ -1,4 +1,4 @@
-import { IHRole, IHistory } from '../interfaces/history.model';
+import { IHRole, IHistory, PartHistory, TypePartEnum } from '../interfaces/history.model';
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
@@ -74,9 +74,9 @@ export class ChatService {
     /**
      * Starts chat-conversation
      *
-     * @param userPrompt user message to send to AI
+     * @param parts user messages to send to AI
      */
-    async startChat(userPrompt: string): Promise<void> {
+    async startChat(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
             const chatList: IChat[] = JSON.parse(
                 JSON.stringify(this.dispathChatList.asReadonly()())
@@ -90,17 +90,14 @@ export class ChatService {
 
             chatSelected.history.push({
                 role: IHRole.user,
-                parts: [
-                    {
-                        text: userPrompt,
-                    },
-                ],
+                parts
             });
 
             chatSelected.history.push({
                 role: IHRole.model,
                 parts: [
                     {
+                        type: TypePartEnum.text,
                         text: '',
                     },
                 ],
@@ -108,13 +105,15 @@ export class ChatService {
 
             this.dispathChatList.set(chatList);
 
+            this.dispathChatChunk.next('...');
+
             try {
                 const response = await fetch(
                     `${environment.backend_url}/${this.dispatchAiEngine()}/chat/start`,
                     {
                         method: 'POST',
                         body: JSON.stringify({
-                            prompt: userPrompt,
+                            history: chatSelected.history[0],
                         }),
                         headers: {
                             'Content-Type': 'application/json',
@@ -165,9 +164,9 @@ export class ChatService {
     /**
      * Send user message to current chat history conversation
      *
-     * @param userPrompt user message to send to AI
+     * @param parts user messages to send to AI
      */
-    async conversation(userPrompt: string): Promise<void> {
+    async conversation(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
             const chatList: IChat[] = JSON.parse(
                 JSON.stringify(this.dispathChatList.asReadonly()())
@@ -181,21 +180,18 @@ export class ChatService {
 
             if (!chatHistory) return resolve();
 
-            chatHistoryM = JSON.parse(JSON.stringify(chatHistory.history));
-
             chatHistory.history.push({
                 role: IHRole.user,
-                parts: [
-                    {
-                        text: userPrompt,
-                    },
-                ],
+                parts
             });
+
+            chatHistoryM = JSON.parse(JSON.stringify(chatHistory.history));
 
             chatHistory.history.push({
                 role: IHRole.model,
                 parts: [
                     {
+                        type: TypePartEnum.text,
                         text: '',
                     },
                 ],
@@ -203,13 +199,14 @@ export class ChatService {
 
             this.dispathChatList.set(chatList);
 
+            this.dispathChatChunk.next('...');
+
             try {
                 const response = await fetch(
                     `${environment.backend_url}/${this.dispatchAiEngine()}/chat/conversation`,
                     {
                         method: 'POST',
                         body: JSON.stringify({
-                            prompt: userPrompt,
                             history: chatHistoryM,
                         }),
                         headers: {
