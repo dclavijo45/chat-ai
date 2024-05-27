@@ -219,6 +219,10 @@ input[type=file] {
     color: var(--color-2-dark);
 }
 
+.markdown {
+    overflow-x: auto;
+}
+
 @media (max-width: 1000px) {
     .input-user {
         width: 90%;
