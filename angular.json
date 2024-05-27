@@ -23,9 +23,25 @@
                         "polyfills": ["zone.js"],
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
-                        "assets": ["src/favicon.ico", "src/assets", "src/robots.txt"],
-                        "styles": ["src/styles.scss", "node_modules/simple-notify/dist/simple-notify.css"],
-                        "scripts": [],
+                        "assets": [
+                            "src/favicon.ico",
+                            "src/assets",
+                            "src/robots.txt"
+                        ],
+                        "styles": [
+                            "src/styles.scss",
+                            "node_modules/simple-notify/dist/simple-notify.css",
+                            "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.css",
+                            "node_modules/prism-themes/themes/prism-one-dark.min.css"
+                        ],
+                        "scripts": [
+                            "node_modules/prismjs/prism.js",
+                            "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.js",
+                            "node_modules/prismjs/components/prism-typescript.min.js",
+                            "node_modules/prismjs/components/prism-javascript.min.js",
+                            "node_modules/prismjs/components/prism-python.min.js"
+
+                        ],
                         "server": "src/main.server.ts",
                         "prerender": true,
                         "ssr": {
@@ -42,8 +58,8 @@
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "2kb",
-                                    "maximumError": "4kb"
+                                    "maximumWarning": "50kb",
+                                    "maximumError": "100kb"
                                 }
                             ],
                             "fileReplacements": [

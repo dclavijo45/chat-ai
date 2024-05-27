@@ -15,9 +15,17 @@
                             }
 
                             @case (TypePartEnum.text) {
-                                <p class="chat-element-text" themeColor>
-                                    {{ chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream() }}
-                                </p>
+                                @switch (chat.role) {
+                                    @case (IHRole.user) {
+                                        <p class="chat-element-text" themeColor>{{part.text}}</p>
+                                    }
+
+                                    @case (IHRole.model) {
+                                        <markdown class="markdown" [lineNumbers]="true"
+                                            [data]="chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()"
+                                            themeColor/>
+                                    }
+                                }
                             }
                         }
                     </div>
@@ -50,7 +58,8 @@
             <i class="material-icons-outlined input-icon select-files-icon" (click)="inputFile.click()"
                 [class.active]="userInputPrompt.valid" themeColor>add_photo_alternate</i>
 
-            <input #inputFile type="file" (change)="selectFiles($event)" accept=".png, .jpeg, .jpg, .webp, .gif"
+            <input #inputFile type="file" (change)="selectFiles($event)"
+                accept=".png, .jpeg, .jpg, .webp, .gif"
                 multiple>
 
             <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"

@@ -32,6 +32,7 @@ import { IChatImage } from '../../interfaces/image.model';
 import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
 import { NotifyService } from '../../../../shared/services/notify.service';
+import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
     selector: 'chat-history',
@@ -42,6 +43,7 @@ import { NotifyService } from '../../../../shared/services/notify.service';
         ReactiveFormsModule,
         ToggleChunkChatPipe,
         ThemeColorDirective,
+        MarkdownModule
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',

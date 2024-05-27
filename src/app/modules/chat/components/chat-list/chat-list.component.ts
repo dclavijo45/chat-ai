@@ -41,7 +41,7 @@ export class ChatListComponent implements OnInit {
             initialValue: AiEngineEnum.openai,
         });
 
-        this.aiEngineEnum = AiEngineEnum;
+        this.AiEngineEnum = AiEngineEnum;
     }
 
     private chatService: ChatService;
@@ -54,7 +54,7 @@ export class ChatListComponent implements OnInit {
 
     aiEngine: Signal<AiEngineEnum>;
 
-    aiEngineEnum: typeof AiEngineEnum;
+    AiEngineEnum: typeof AiEngineEnum;
 
     get themeColor(): Observable<ThemeColorEnum> {
         return this.themeColorService.themeColor;

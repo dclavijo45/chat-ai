@@ -92,7 +92,6 @@ main.dark {
 }
 
 .input-user.images{
-    // grid-template-rows: 50px 1fr;
     grid-template-rows: repeat(auto-fill, minmax(50px, 1fr));
 }
 
@@ -214,6 +213,10 @@ input[type=file] {
     position: fixed;
     height: 0;
     width: 0;
+}
+
+.markdown.dark {
+    color: var(--color-2-dark);
 }
 
 @media (max-width: 1000px) {

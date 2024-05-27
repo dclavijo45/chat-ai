@@ -1,4 +1,4 @@
-Chat AI using Google Gemini and OpenAi API switchable
+Chat AI using Google Gemini, OpenAi API and Anthropic (Claude AI) switchable
 =======
 
 Angular 18 and NodeJS with Express has been used for build the project
@@ -9,6 +9,7 @@ Requirements:
 - NodeJS
 - Google Gemini API key
 - OpenAi API key
+- Anthropic API key
 
 How to use:
 ---------------

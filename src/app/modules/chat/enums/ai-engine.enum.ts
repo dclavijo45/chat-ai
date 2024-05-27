@@ -1,4 +1,5 @@
 export enum AiEngineEnum {
     openai = 'openai',
-    gemini = 'gemini'
+    gemini = 'gemini',
+    anthropic = 'anthropic',
 }

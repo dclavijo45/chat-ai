@@ -4,12 +4,19 @@
                 themeColor>add</i></span>
 
         <div class="ai-logos">
-            <img class="logo" [class.active]="aiEngine() == 'openai'" src="/assets/img/chat-gpt-logo.png"
-                alt="Logo chat gpt" width="30" height="30" title="ChatGPT" (click)="setEngine(aiEngineEnum.openai)"
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.openai" src="/assets/img/chat-gpt-logo.png"
+                alt="Logo chat gpt" width="30" height="30" title="ChatGPT"
+                (click)="setEngine(AiEngineEnum.openai)"
                 themeColor>
 
-            <img class="logo" [class.active]="aiEngine() == 'gemini'" src="/assets/img/gemini-logo.png"
-                alt="Logo gemini" width="30" height="30" title="Gemini" (click)="setEngine(aiEngineEnum.gemini)"
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.gemini" src="/assets/img/gemini-logo.png"
+                alt="Logo gemini" width="30" height="30" title="Gemini"
+                (click)="setEngine(AiEngineEnum.gemini)"
+                themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.anthropic"
+                src="/assets/img/anthropic-logo.png" alt="Logo anthropic"
+                width="30" height="30" title="Anthropic" (click)="setEngine(AiEngineEnum.anthropic)"
                 themeColor>
         </div>
     </div>
