@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    container_name: chat-ai-frontend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
