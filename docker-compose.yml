@@ -1,6 +1,12 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     container_name: chat-ai-frontend
     ports:
       - "3001:3001"
