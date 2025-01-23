@@ -114,6 +114,6 @@ export class ChatListComponent implements OnInit {
      * @param engine - ai engine to set
      */
     setEngine(engine: AiEngineEnum): void {
-        this.chatService.setAiEngine(engine)
+        this.chatService.setAiEngine(engine);
     }
 }

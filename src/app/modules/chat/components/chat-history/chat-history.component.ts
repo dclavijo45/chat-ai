@@ -44,7 +44,7 @@ import { ChatService } from '../../services/chat.service';
         ReactiveFormsModule,
         ToggleChunkChatPipe,
         ThemeColorDirective,
-        MarkdownModule
+        MarkdownModule,
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
@@ -70,6 +70,10 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
             initialValue: '',
         });
 
+        this.aiEngine = toSignal(this.chatService.aiEngine, {
+            initialValue: AiEngineEnum.deepseek,
+        });
+
         this.$destroy = new Subscription();
 
         this.isStreaming = false;
@@ -80,34 +84,77 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.IHRole = IHRole;
     }
 
+    /**
+     * Html element reference to the chat history list
+     */
     @ViewChild('historyList') historyList!: ElementRef<HTMLDivElement>;
 
+    /**
+     * Service to manage chat history
+     */
     private chatService: ChatService;
 
+    /**
+     * Subscription to destroy observables
+     */
     private $destroy: Subscription;
 
+    /**
+     * Flag if is streaming a chat server response
+     */
     private isStreaming: boolean;
 
+    /**
+     * Change detector reference to update the view
+     */
     private cdr: ChangeDetectorRef;
 
+    /**
+     * Service to notify messages to the user
+     */
     private notifyService: NotifyService;
 
+    /**
+     * Chat history signal to manage the chat history
+     */
     chatHistory: WritableSignal<IChat>;
 
+    /**
+     * Chat chunk stream signal to manage the chat chunk stream
+     */
     chatChunkStream: Signal<string>;
 
+    /**
+     * User input prompt form control
+     */
     userInputPrompt: FormControl<string | null>;
 
+    /**
+     * List of images selected by user to send to the chat server
+     */
     imagesList: WritableSignal<IChatImage[]>;
 
+    /**
+     * Enum to manage the type of part in the chat history
+     */
     TypePartEnum: typeof TypePartEnum;
 
+    /**
+     * Enum to manage the role of the part in the chat history
+     */
     IHRole: typeof IHRole;
+
+    /**
+     * Selected chat ai engine
+     */
+    aiEngine: Signal<AiEngineEnum>;
 
     ngOnInit(): void {
         this.$destroy.add(
             this.chatService.chatSelect.subscribe(async (chatId) => {
-                const chatList = await firstValueFrom(this.chatService.chatList);
+                const chatList = await firstValueFrom(
+                    this.chatService.chatList
+                );
                 const chatHistory = chatList.find((chat) => chat.id == chatId);
 
                 if (chatHistory) {
@@ -120,7 +167,9 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
         this.$destroy.add(
             this.chatService.chatList.subscribe(async (chatList) => {
-                const chatSelected = await firstValueFrom(this.chatService.chatSelect);
+                const chatSelected = await firstValueFrom(
+                    this.chatService.chatSelect
+                );
                 const chatHistory = chatList.find(
                     (chat) => chat.id == chatSelected
                 );
@@ -130,6 +179,20 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                 }
 
                 this.scrollHistory();
+            })
+        );
+
+        this.$destroy.add(
+            this.chatService.aiEngine.subscribe((aiEngine) => {
+                if (aiEngine == AiEngineEnum.deepseek) {
+                    if (this.imagesList().length) {
+                        this.notifyService.error(
+                            'El modelo de IA actual no soporta imágenes, se limpiará la lista de imágenes seleccionadas'
+                        );
+
+                        this.imagesList.set([]);
+                    }
+                }
             })
         );
 
@@ -144,6 +207,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.$destroy ? this.$destroy.unsubscribe() : false;
     }
 
+    /**
+     * Send message to the chat server
+     *
+     * @param e Event to prevent default enter space
+     */
     async sendMessage(e: Event): Promise<void> {
         e.preventDefault();
 
@@ -190,6 +258,9 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.isStreaming = false;
     }
 
+    /**
+     * Scroll to the bottom of the chat history list
+     */
     scrollHistory(): void {
         setTimeout(() => {
             this.historyList.nativeElement.scrollTop =
@@ -197,6 +268,28 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         }, 100);
     }
 
+    /**
+     * Load images from the input file
+     *
+     * @param inputFile Input file to load images
+     */
+    loadImages(inputFile: HTMLInputElement): void {
+        if (this.aiEngine() == AiEngineEnum.deepseek) {
+            this.notifyService.error(
+                'El modelo de IA actual no soporta imágenes'
+            );
+            return;
+        }
+
+        inputFile.click();
+    }
+
+    /**
+     * Select files from the input file and add to the images list
+     *
+     * @param e Event to get the files from the input file
+     * @returns
+     */
     async selectFiles(e: any): Promise<void> {
         const files = e.target.files as File[];
         const maxFileSize = 1 * 1024 * 1024; // 1MB
@@ -205,7 +298,9 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         if (!files.length) return;
 
         if (files.length > maxFiles) {
-            this.notifyService.error(`Solo se permiten máximo ${maxFiles} imágenes`);
+            this.notifyService.error(
+                `Solo se permiten máximo ${maxFiles} imágenes`
+            );
             return;
         }
 
@@ -256,6 +351,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
+    /**
+     * Remove image from the images list
+     *
+     * @param image Image to remove from the images list
+     */
     removeImage(image: IChatImage): void {
         this.imagesList.update((imgList) => {
             imgList = imgList.filter((img) => img.name != image.name);

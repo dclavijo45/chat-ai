@@ -55,7 +55,7 @@
         </div>
 
         <div class="input-manage" [class.images]="imagesList().length">
-            <i class="material-icons-outlined input-icon select-files-icon" (click)="inputFile.click()"
+            <i class="material-icons-outlined input-icon select-files-icon" (click)="loadImages(inputFile)"
                 [class.active]="userInputPrompt.valid" themeColor>add_photo_alternate</i>
 
             <input #inputFile type="file" (change)="selectFiles($event)"
