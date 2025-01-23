@@ -3,13 +3,13 @@ import {
     ChangeDetectorRef,
     Component,
     ElementRef,
+    inject,
     OnDestroy,
     OnInit,
     Signal,
+    signal,
     ViewChild,
     WritableSignal,
-    inject,
-    signal,
 } from '@angular/core';
 import {
     FormControl,
@@ -17,11 +17,14 @@ import {
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MarkdownModule } from 'ngx-markdown';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
+import { NotifyService } from '../../../../shared/services/notify.service';
+import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import {
     IHRole,
@@ -31,8 +34,6 @@ import {
 import { IChatImage } from '../../interfaces/image.model';
 import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
-import { NotifyService } from '../../../../shared/services/notify.service';
-import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
     selector: 'chat-history',
@@ -62,6 +63,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.chatHistory = signal({
             history: [],
             id: crypto.randomUUID(),
+            aiEngine: AiEngineEnum.deepseek,
         });
 
         this.chatChunkStream = toSignal(this.chatService.chatChunkStream, {
@@ -105,16 +107,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.$destroy.add(
             this.chatService.chatSelect.subscribe(async (chatId) => {
-                let $ = null;
-
-                const chatList = await new Promise<IChat[]>((resolve) => {
-                    $ = this.chatService.chatList.subscribe((chatL) =>
-                        resolve(chatL)
-                    );
-                });
-
-                $!.unsubscribe();
-
+                const chatList = await firstValueFrom(this.chatService.chatList);
                 const chatHistory = chatList.find((chat) => chat.id == chatId);
 
                 if (chatHistory) {
@@ -127,16 +120,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
         this.$destroy.add(
             this.chatService.chatList.subscribe(async (chatList) => {
-                let $ = null;
-
-                const chatSelected = await new Promise<string>((resolve) => {
-                    $ = this.chatService.chatSelect.subscribe((chatS) =>
-                        resolve(chatS)
-                    );
-                });
-
-                $!.unsubscribe();
-
+                const chatSelected = await firstValueFrom(this.chatService.chatSelect);
                 const chatHistory = chatList.find(
                     (chat) => chat.id == chatSelected
                 );

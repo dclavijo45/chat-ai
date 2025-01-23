@@ -31,7 +31,7 @@ export class NotifyService {
                 effect: 'fade',
                 speed: 300,
                 showIcon: true,
-                showCloseButton: true,
+                showCloseButton: false,
                 autoclose: true,
                 autotimeout: 5000,
                 type: 'outline',

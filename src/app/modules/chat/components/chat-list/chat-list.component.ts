@@ -38,54 +38,81 @@ export class ChatListComponent implements OnInit {
         });
 
         this.aiEngine = toSignal(this.chatService.aiEngine, {
-            initialValue: AiEngineEnum.openai,
+            initialValue: AiEngineEnum.deepseek,
         });
 
         this.AiEngineEnum = AiEngineEnum;
     }
 
+    /**
+     * Service for managing chat data api
+     */
     private chatService: ChatService;
 
+    /**
+     * Service for managing theme color design
+     */
     themeColorService: ThemeColorService;
 
+    /**
+     * List of chat data
+     */
     chatList: Signal<IChat[]>;
 
+    /**
+     * Selected chat id
+     */
     chatSelected: Signal<string>;
 
+    /**
+     * Selected chat ai engine
+     */
     aiEngine: Signal<AiEngineEnum>;
 
+    /**
+     * Enum for ai engine
+     */
     AiEngineEnum: typeof AiEngineEnum;
 
+    /**
+     * Getter for theme color
+     */
     get themeColor(): Observable<ThemeColorEnum> {
         return this.themeColorService.themeColor;
     }
 
     ngOnInit(): void {
-        if (!this.chatList().length) {
-            this.chatService.addChat();
-        }
-    }
-
-    addChat(): void {
-        if (this.chatList().length) {
-            if (!this.chatList()[this.chatList().length - 1].history.length) {
-                return;
-            }
-        }
-
         this.chatService.addChat();
     }
 
-    selectChat(chatId: string): void {
-        if (this.chatSelected() == chatId) return;
+    /**
+     * Add new chat to chat list
+     */
+    addChat(): void {
+        this.chatService.addChat();
+    }
 
+    /**
+     * Select chat by id
+     *
+     * @param chatId - chat id to select
+     */
+    selectChat(chatId: string): void {
         this.chatService.selectChat(chatId);
     }
 
+    /**
+     * Toggle theme color between available designs
+     */
     toggleThemeColor(): void {
         this.themeColorService.toggleThemeColor();
     }
 
+    /**
+     * Set ai engine for selected chat
+     *
+     * @param engine - ai engine to set
+     */
     setEngine(engine: AiEngineEnum): void {
         this.chatService.setAiEngine(engine)
     }
