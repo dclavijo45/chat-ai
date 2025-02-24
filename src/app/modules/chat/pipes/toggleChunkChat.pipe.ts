@@ -1,7 +1,6 @@
 import { Pipe, inject, type PipeTransform } from '@angular/core';
-import { SafeHtml } from '@angular/platform-browser';
-import { IHRole, IHistory, PartHistory } from '../interfaces/history.model';
 import { MarkdownService } from 'ngx-markdown';
+import { IHistory, PartHistory } from '../interfaces/history.model';
 
 @Pipe({
     name: 'toggleChunkChat',
