@@ -1,9 +1,8 @@
 import {
     Injectable,
     WritableSignal,
-    afterNextRender,
     inject,
-    signal,
+    signal
 } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -42,44 +41,7 @@ export class ChatService {
         this.dispatchIsStreaming = signal(false);
         this.isStreaming = toObservable(this.dispatchIsStreaming);
 
-        afterNextRender(() => {
-            this.socketService.connect();
-
-            // store chunk message temporary
-            let tempChunk = '';
-
-            this.socketService.listenMessage.subscribe((message) => {
-                if (message.state == StateMessageWSEnum.START) {
-                    return;
-                }
-
-                tempChunk += message.messageChunk;
-                this.dispathChatChunk.next(tempChunk);
-
-                if (message.state == StateMessageWSEnum.STREAMING) {
-                    return;
-                }
-
-                if (message.state == StateMessageWSEnum.END_STREAMING) {
-                    this.dispatchIsStreaming.set(false);
-
-                    const chatList = this.dispathChatList();
-                    const chatSelected = chatList.find(
-                        (chatE) => chatE.id == message.conversationId
-                    );
-
-                    if (!chatSelected) return;
-
-                    chatSelected.history[
-                        chatSelected.history.length - 1
-                    ].parts[0].text = JSON.parse(JSON.stringify(tempChunk));
-
-                    tempChunk = '';
-                    this.dispathChatChunk.next('');
-                    return;
-                }
-            });
-        });
+        this.listenMessage();
     }
 
     /**
@@ -116,6 +78,46 @@ export class ChatService {
      * Signal to dispatch if is streaming a chat server response
      */
     private dispatchIsStreaming: WritableSignal<boolean>;
+
+    /**
+     * Listen message from socket service
+     */
+    private listenMessage(): void {
+        // store chunk message temporary
+        let tempChunk = '';
+
+        this.socketService.listenMessage.subscribe((message) => {
+            if (message.state == StateMessageWSEnum.START) {
+                return;
+            }
+
+            tempChunk += message.messageChunk;
+            this.dispathChatChunk.next(tempChunk);
+
+            if (message.state == StateMessageWSEnum.STREAMING) {
+                return;
+            }
+
+            if (message.state == StateMessageWSEnum.END_STREAMING) {
+                this.dispatchIsStreaming.set(false);
+
+                const chatList = this.dispathChatList();
+                const chatSelected = chatList.find(
+                    (chatE) => chatE.id == message.conversationId
+                );
+
+                if (!chatSelected) return;
+
+                chatSelected.history[
+                    chatSelected.history.length - 1
+                ].parts[0].text = JSON.parse(JSON.stringify(tempChunk));
+
+                tempChunk = '';
+                this.dispathChatChunk.next('');
+                return;
+            }
+        });
+    }
 
     /**
      * Observable to get chat chunk

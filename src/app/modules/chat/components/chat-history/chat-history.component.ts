@@ -1,4 +1,5 @@
 import {
+    afterNextRender,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
@@ -34,6 +35,7 @@ import {
 import { IChatImage } from '../../interfaces/image.model';
 import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
     selector: 'chat-history',
@@ -52,13 +54,14 @@ import { ChatService } from '../../services/chat.service';
 })
 export class ChatHistoryComponent implements OnInit, OnDestroy {
     constructor() {
-        this.userInputPrompt = new FormControl<string | null>('', [
-            Validators.required,
-        ]);
-
         this.chatService = inject(ChatService);
         this.cdr = inject(ChangeDetectorRef);
         this.notifyService = inject(NotifyService);
+        this.socketService = inject(SocketService);
+
+        this.userInputPrompt = new FormControl<string | null>('', [
+            Validators.required,
+        ]);
 
         this.chatHistory = signal({
             history: [],
@@ -74,14 +77,27 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
             initialValue: AiEngineEnum.deepseek,
         });
 
+        this.isServerConnected = toSignal(
+            this.socketService.listenIsConnected,
+            {
+                initialValue: false,
+            }
+        );
+
         this.$destroy = new Subscription();
 
-        this.isStreaming = false;
+        this.isStreaming = toSignal(this.chatService.isStreaming, {
+            initialValue: false,
+        });
 
         this.imagesList = signal([]);
 
         this.TypePartEnum = TypePartEnum;
         this.IHRole = IHRole;
+
+        afterNextRender(() => {
+            this.socketService.connect();
+        });
     }
 
     /**
@@ -102,7 +118,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     /**
      * Flag if is streaming a chat server response
      */
-    private isStreaming: boolean;
+    isStreaming: Signal<boolean>;
 
     /**
      * Change detector reference to update the view
@@ -113,6 +129,16 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
      * Service to notify messages to the user
      */
     private notifyService: NotifyService;
+
+    /**
+     * Service to manage the socket connection
+     */
+    private socketService: SocketService;
+
+    /**
+     * Flag if the server is connected
+     */
+    isServerConnected: Signal<boolean>;
 
     /**
      * Chat history signal to manage the chat history
@@ -201,12 +227,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                 this.scrollHistory();
             })
         );
-
-        this.$destroy.add(
-            this.chatService.isStreaming.subscribe((isStreaming) => {
-                this.isStreaming = isStreaming;
-            })
-        );
     }
 
     ngOnDestroy(): void {
@@ -221,7 +241,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     async sendMessage(e: Event): Promise<void> {
         e.preventDefault();
 
-        if (this.isStreaming) return;
+        if (this.isStreaming()) return;
 
         if (this.userInputPrompt.invalid) return;
 
@@ -276,7 +296,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
      * @param inputFile Input file to load images
      */
     loadImages(inputFile: HTMLInputElement): void {
-        if (this.aiEngine() == AiEngineEnum.deepseek) {
+        if (
+            this.aiEngine() == AiEngineEnum.deepseek ||
+            this.aiEngine() == AiEngineEnum.qwenai ||
+            this.aiEngine() == AiEngineEnum.mistral
+        ) {
             this.notifyService.error(
                 'El modelo de IA actual no soporta imágenes'
             );

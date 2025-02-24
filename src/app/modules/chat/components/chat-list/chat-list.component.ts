@@ -3,18 +3,19 @@ import {
     Component,
     OnInit,
     Signal,
-    inject,
+    inject
 } from '@angular/core';
 
-import { ChatService } from '../../services/chat.service';
 import { CommonModule } from '@angular/common';
-import { IChat } from '../../interfaces/chat.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
+import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
 import { ThemeColorService } from '../../../../shared/services/theme-color.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
-import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
+import { IChat } from '../../interfaces/chat.model';
+import { ChatService } from '../../services/chat.service';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
     selector: 'chat-list',
@@ -82,7 +83,7 @@ export class ChatListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.chatService.addChat();
+        this.addChat();
     }
 
     /**

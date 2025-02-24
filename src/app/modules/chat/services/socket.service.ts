@@ -22,8 +22,10 @@ export class SocketService {
             messageChunk: '',
             state: StateMessageWSEnum.START,
         });
+        this.dispatchIsConnected = signal<boolean>(false);
 
         this.listenMessage = toObservable(this.dispatchMessage);
+        this.listenIsConnected = toObservable(this.dispatchIsConnected);
 
         this.timerPing = 0;
     }
@@ -37,6 +39,11 @@ export class SocketService {
      * @description Signal for dispatching message
      */
     private dispatchMessage: WritableSignal<IMessageWSResponse>;
+
+    /**
+     * @description Signal for dispatching connection status
+     */
+    private dispatchIsConnected: WritableSignal<boolean>;
 
     /**
      * @description Timer for ping socket server
@@ -54,10 +61,11 @@ export class SocketService {
             });
 
         this.socket.fromEvent('connect').subscribe(() => {
+            this.dispatchIsConnected.update(() => true);
             console.log('connected socket server');
 
             if (this.timerPing) {
-                window.clearInterval(this.timerPing);
+                clearInterval(this.timerPing);
                 this.timerPing = 0;
             }
 
@@ -65,9 +73,10 @@ export class SocketService {
         });
 
         this.socket.fromEvent('disconnect').subscribe(() => {
+            this.dispatchIsConnected.update(() => false);
             console.log('disconnected socket server');
 
-            window.clearInterval(this.timerPing);
+            clearInterval(this.timerPing);
             this.timerPing = 0;
         });
     }
@@ -89,9 +98,11 @@ export class SocketService {
      * @description Trigger the ping to the socket server
      */
     private triggerPing(): void {
-        this.timerPing = window.setInterval(() => {
-            this.sendPing();
-        }, 10000);
+        this.timerPing = Number(
+            setInterval(() => {
+                this.sendPing();
+            }, 10000)
+        );
     }
 
     /**
@@ -100,11 +111,15 @@ export class SocketService {
     listenMessage: Observable<IMessageWSResponse>;
 
     /**
+     * @description Listen to the connection status
+     */
+    listenIsConnected: Observable<boolean>;
+
+    /**
      * @description Connect to the socket server
      */
     connect(): void {
         this.socket.connect();
-
         this.listenSocketServerEvents();
     }
 
