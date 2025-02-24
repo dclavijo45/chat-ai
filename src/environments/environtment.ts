@@ -1,4 +1,6 @@
 export const environment = {
     production: false,
-    backend_url: 'http://localhost:3002'
+    socket_config: {
+        url: 'http://localhost:3002'
+    }
 };

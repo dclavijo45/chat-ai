@@ -2,20 +2,26 @@
     <div class="new-chat" themeColor>
         <div class="ai-logos">
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.deepseek" src="/assets/img/deepseek-logo.png"
-                alt="Logo Deepseek" width="30" height="30" title="Deepseek" (click)="setEngine(AiEngineEnum.deepseek)"
+                alt="Logo Deepseek" width="24" height="24" title="Deepseek" (click)="setEngine(AiEngineEnum.deepseek)"
                 themeColor>
 
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.openai" src="/assets/img/chat-gpt-logo.png"
-                alt="Logo chat gpt" width="30" height="30" title="ChatGPT" (click)="setEngine(AiEngineEnum.openai)"
+                alt="Logo chat gpt" width="24" height="24" title="ChatGPT" (click)="setEngine(AiEngineEnum.openai)"
                 themeColor>
 
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.gemini" src="/assets/img/gemini-logo.png"
-                alt="Logo gemini" width="30" height="30" title="Gemini" (click)="setEngine(AiEngineEnum.gemini)"
+                alt="Logo gemini" width="24" height="24" title="Gemini" (click)="setEngine(AiEngineEnum.gemini)"
                 themeColor>
 
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.anthropic" src="/assets/img/anthropic-logo.png"
-                alt="Logo anthropic" width="30" height="30" title="Anthropic"
+                alt="Logo anthropic" width="24" height="24" title="Anthropic"
                 (click)="setEngine(AiEngineEnum.anthropic)" themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.qwenai" src="/assets/img/qwen-logo.png"
+                alt="Logo qwen" width="24" height="24" title="Qwen" (click)="setEngine(AiEngineEnum.qwenai)" themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.mistral" src="/assets/img/mistral-logo.png"
+                alt="Logo mistral" width="24" height="24" title="Qwen" (click)="setEngine(AiEngineEnum.mistral)" themeColor>
         </div>
 
         <span class="text-new" (click)="addChat()" themeColor>Nuevo chat <i class="material-icons-outlined add-icon"

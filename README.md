@@ -1,4 +1,4 @@
-Chat AI using Google Gemini, OpenAi API, Anthropic (Claude AI) and DeepSeek switchable
+Chat AI using Google Gemini, OpenAi API, Anthropic (Claude AI), DeepSeek, QwenAI and Mistral switchable
 =======
 
 Angular 18 and NodeJS with Express has been used for build the project
@@ -11,6 +11,8 @@ Requirements:
 - OpenAi API key
 - Anthropic API key
 - DeepSeek API key
+- QwenAI API key
+- Mistral API key
 
 How to use:
 ---------------

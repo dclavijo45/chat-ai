@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 
 import { ChatHeaderComponent } from '../components/chat-header/chat-header.component';
 import { ChatHistoryComponent } from '../components/chat-history/chat-history.component';

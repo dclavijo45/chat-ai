@@ -201,6 +201,12 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                 this.scrollHistory();
             })
         );
+
+        this.$destroy.add(
+            this.chatService.isStreaming.subscribe((isStreaming) => {
+                this.isStreaming = isStreaming;
+            })
+        );
     }
 
     ngOnDestroy(): void {
@@ -220,8 +226,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         if (this.userInputPrompt.invalid) return;
 
         if (!this.userInputPrompt.value?.trim()) return;
-
-        this.isStreaming = true;
 
         const userPrompt: string = JSON.parse(
             JSON.stringify(this.userInputPrompt.value)
@@ -250,12 +254,10 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.imagesList.set([]);
 
         if (this.chatHistory().history.length) {
-            await this.chatService.conversation(parts);
+            await this.chatService.conversationWs(parts);
         } else {
-            await this.chatService.startChat(parts);
+            await this.chatService.startChatWs(parts);
         }
-
-        this.isStreaming = false;
     }
 
     /**

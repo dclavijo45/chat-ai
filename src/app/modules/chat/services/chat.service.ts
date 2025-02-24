@@ -1,12 +1,23 @@
-import { IHRole, IHistory, PartHistory, TypePartEnum } from '../interfaces/history.model';
-import { Injectable, WritableSignal, inject, signal } from '@angular/core';
+import {
+    Injectable,
+    WritableSignal,
+    afterNextRender,
+    inject,
+    signal,
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import {
+    IHRole,
+    PartHistory,
+    TypePartEnum
+} from '../interfaces/history.model';
 
-import { IChat } from '../interfaces/chat.model';
-import { environment } from '../../../../environments/environtment';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AiEngineEnum } from '../enums/ai-engine.enum';
 import { NotifyService } from '../../../shared/services/notify.service';
+import { AiEngineEnum } from '../enums/ai-engine.enum';
+import { IChat } from '../interfaces/chat.model';
+import { StateMessageWSEnum } from '../interfaces/socket.model';
+import { SocketService } from './socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -14,6 +25,7 @@ import { NotifyService } from '../../../shared/services/notify.service';
 export class ChatService {
     constructor() {
         this.notifyService = inject(NotifyService);
+        this.socketService = inject(SocketService);
 
         this.dispathChatChunk = new Subject<string>();
         this.chatChunkStream = this.dispathChatChunk.asObservable();
@@ -27,13 +39,58 @@ export class ChatService {
         this.dispatchAiEngine = signal(AiEngineEnum.deepseek);
         this.aiEngine = toObservable(this.dispatchAiEngine);
 
-        this.isStreaming = signal(false);
+        this.dispatchIsStreaming = signal(false);
+        this.isStreaming = toObservable(this.dispatchIsStreaming);
+
+        afterNextRender(() => {
+            this.socketService.connect();
+
+            // store chunk message temporary
+            let tempChunk = '';
+
+            this.socketService.listenMessage.subscribe((message) => {
+                if (message.state == StateMessageWSEnum.START) {
+                    return;
+                }
+
+                tempChunk += message.messageChunk;
+                this.dispathChatChunk.next(tempChunk);
+
+                if (message.state == StateMessageWSEnum.STREAMING) {
+                    return;
+                }
+
+                if (message.state == StateMessageWSEnum.END_STREAMING) {
+                    this.dispatchIsStreaming.set(false);
+
+                    const chatList = this.dispathChatList();
+                    const chatSelected = chatList.find(
+                        (chatE) => chatE.id == message.conversationId
+                    );
+
+                    if (!chatSelected) return;
+
+                    chatSelected.history[
+                        chatSelected.history.length - 1
+                    ].parts[0].text = JSON.parse(JSON.stringify(tempChunk));
+
+                    tempChunk = '';
+                    this.dispathChatChunk.next('');
+                    return;
+                }
+            });
+        });
     }
 
     /**
      * Notify service for show messages to user
      */
     private notifyService: NotifyService;
+
+    /**
+     * @description Socket service managing connection
+     */
+    private socketService: SocketService;
 
     /**
      * Subject to dispatch chat chunk
@@ -56,6 +113,11 @@ export class ChatService {
     private dispatchAiEngine: WritableSignal<AiEngineEnum>;
 
     /**
+     * Signal to dispatch if is streaming a chat server response
+     */
+    private dispatchIsStreaming: WritableSignal<boolean>;
+
+    /**
      * Observable to get chat chunk
      */
     chatChunkStream: Observable<string>;
@@ -76,9 +138,9 @@ export class ChatService {
     aiEngine: Observable<AiEngineEnum>;
 
     /**
-     * Signal to dispatch if is streaming a chat server response
+     * Observable to get if is streaming
      */
-    isStreaming: WritableSignal<boolean>;
+    isStreaming: Observable<boolean>;
 
     /**
      * Select a chat by chat id
@@ -86,8 +148,10 @@ export class ChatService {
      * @param chatId chat id to chat to select
      */
     selectChat(chatId: string): void {
-        if (this.isStreaming()) {
-            this.notifyService.warning('No puedes cambiar de chat mientras está en espera de respuesta');
+        if (this.dispatchIsStreaming()) {
+            this.notifyService.warning(
+                'No puedes cambiar de chat mientras está en espera de respuesta'
+            );
             return;
         }
 
@@ -95,9 +159,7 @@ export class ChatService {
 
         const chatList = this.dispathChatList.asReadonly()();
 
-        const chatSelected = chatList.find(
-            (chat) => chat.id == chatId
-        );
+        const chatSelected = chatList.find((chat) => chat.id == chatId);
 
         if (!chatSelected) {
             return;
@@ -116,8 +178,10 @@ export class ChatService {
      * @param engine AI engine enum selected
      */
     setAiEngine(engine: AiEngineEnum): void {
-        if (this.isStreaming()) {
-            this.notifyService.warning('No puedes cambiar de modelo mientras está en espera de respuesta');
+        if (this.dispatchIsStreaming()) {
+            this.notifyService.warning(
+                'No puedes cambiar de modelo mientras está en espera de respuesta'
+            );
             return;
         }
 
@@ -147,14 +211,21 @@ export class ChatService {
      * Add a chat to chat list and select it
      */
     addChat(): void {
-        if (this.isStreaming()) {
-            this.notifyService.warning('No puedes agregar un chat mientras está en espera de respuesta');
+        if (this.dispatchIsStreaming()) {
+            this.notifyService.warning(
+                'No puedes agregar un chat mientras está en espera de respuesta'
+            );
             return;
         }
 
         if (this.dispathChatList().length) {
-            if (!this.dispathChatList()[this.dispathChatList().length - 1].history.length) {
-                this.notifyService.error('No puedes agregar un chat hasta que el chat actual haya comenzado');
+            if (
+                !this.dispathChatList()[this.dispathChatList().length - 1]
+                    .history.length
+            ) {
+                this.notifyService.error(
+                    'No puedes agregar un chat hasta que el chat actual haya comenzado'
+                );
                 return;
             }
         }
@@ -179,11 +250,9 @@ export class ChatService {
      *
      * @param parts user messages to send to AI
      */
-    async startChat(parts: PartHistory[]): Promise<void> {
+    async startChatWs(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
-            const chatList: IChat[] = JSON.parse(
-                JSON.stringify(this.dispathChatList.asReadonly()())
-            );
+            const chatList: IChat[] = this.dispathChatList();
 
             const chatSelected = chatList.find(
                 (chatE) => chatE.id == this.dispathChatSelect()
@@ -191,11 +260,11 @@ export class ChatService {
 
             if (!chatSelected) return resolve();
 
-            this.isStreaming.set(true);
+            this.dispatchIsStreaming.set(true);
 
             chatSelected.history.push({
                 role: IHRole.user,
-                parts
+                parts,
             });
 
             chatSelected.history.push({
@@ -212,60 +281,11 @@ export class ChatService {
 
             this.dispathChatChunk.next('...');
 
-            try {
-                const response = await fetch(
-                    `${environment.backend_url}/${this.dispatchAiEngine()}/chat/start`,
-                    {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            history: chatSelected.history[0],
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
-
-                if (response?.body) {
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let text = '';
-
-                    const readChunk = async () => {
-                        const { done, value } = await reader.read();
-
-                        if (done) {
-                            chatSelected.history[
-                                chatSelected.history.length - 1
-                            ].parts[0].text = text;
-
-                            this.dispathChatList.set(chatList);
-
-                            this.dispathChatChunk.next('');
-
-                            this.isStreaming.set(false);
-                            return resolve();
-                        }
-
-                        const content = decoder.decode(value, { stream: true });
-
-                        text += content;
-
-                        this.dispathChatChunk.next(text);
-
-                        readChunk();
-                    };
-
-                    readChunk();
-                } else {
-                    this.isStreaming.set(false);
-                    resolve();
-                }
-            } catch (error) {
-                this.dispathChatChunk.next('Ha ocurrido un error');
-                this.isStreaming.set(false);
-                resolve();
-            }
+            this.socketService.sendMessages({
+                history: chatSelected.history.slice(0, -1),
+                aiEngine: this.dispatchAiEngine(),
+                conversationId: chatSelected.id,
+            });
         });
     }
 
@@ -274,13 +294,9 @@ export class ChatService {
      *
      * @param parts user messages to send to AI
      */
-    async conversation(parts: PartHistory[]): Promise<void> {
+    async conversationWs(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
-            const chatList: IChat[] = JSON.parse(
-                JSON.stringify(this.dispathChatList.asReadonly()())
-            );
-
-            let chatHistoryM: IHistory[] = [];
+            const chatList: IChat[] = this.dispathChatList();
 
             const chatHistory = chatList.find(
                 (chatL) => chatL.id == this.dispathChatSelect()
@@ -288,14 +304,12 @@ export class ChatService {
 
             if (!chatHistory) return resolve();
 
-            this.isStreaming.set(true);
+            this.dispatchIsStreaming.set(true);
 
             chatHistory.history.push({
                 role: IHRole.user,
-                parts
+                parts,
             });
-
-            chatHistoryM = JSON.parse(JSON.stringify(chatHistory.history));
 
             chatHistory.history.push({
                 role: IHRole.model,
@@ -311,66 +325,11 @@ export class ChatService {
 
             this.dispathChatChunk.next('...');
 
-            try {
-                const response = await fetch(
-                    `${environment.backend_url}/${this.dispatchAiEngine()}/chat/conversation`,
-                    {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            history: chatHistoryM,
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
-
-                if (response?.body) {
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let text = '';
-
-                    const readChunk = async () => {
-                        const { done, value } = await reader.read();
-
-                        if (done) {
-                            const chatSelected = chatList.find(
-                                (chatE) => chatE.id == this.dispathChatSelect()
-                            );
-
-                            if (chatSelected) {
-                                chatSelected.history[
-                                    chatSelected.history.length - 1
-                                ].parts[0].text = text;
-                            }
-
-                            this.dispathChatList.set(chatList);
-
-                            this.dispathChatChunk.next('');
-
-                            this.isStreaming.set(false);
-                            return resolve();
-                        }
-
-                        const content = decoder.decode(value, { stream: true });
-
-                        text += content;
-
-                        this.dispathChatChunk.next(text);
-
-                        readChunk();
-                    };
-
-                    readChunk();
-                } else {
-                    this.isStreaming.set(false);
-                    resolve();
-                }
-            } catch (error) {
-                this.dispathChatChunk.next('Ha ocurrido un error');
-                this.isStreaming.set(false);
-                resolve();
-            }
+            this.socketService.sendMessages({
+                history: chatHistory.history.slice(0, -1),
+                aiEngine: this.dispatchAiEngine(),
+                conversationId: chatHistory.id,
+            });
         });
     }
 }

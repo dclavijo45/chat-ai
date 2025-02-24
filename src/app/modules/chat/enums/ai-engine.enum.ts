@@ -3,4 +3,6 @@ export enum AiEngineEnum {
     gemini = 'gemini',
     anthropic = 'anthropic',
     deepseek = 'deepseek',
+    qwenai = 'qwenai',
+    mistral = 'mistral',
 }
