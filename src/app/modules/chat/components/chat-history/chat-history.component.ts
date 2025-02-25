@@ -39,7 +39,6 @@ import { SocketService } from '../../services/socket.service';
 
 @Component({
     selector: 'chat-history',
-    standalone: true,
     imports: [
         CommonModule,
         FormsModule,
@@ -50,7 +49,7 @@ import { SocketService } from '../../services/socket.service';
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatHistoryComponent implements OnInit, OnDestroy {
     constructor() {

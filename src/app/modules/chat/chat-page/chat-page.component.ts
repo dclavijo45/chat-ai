@@ -5,11 +5,10 @@ import { ChatHistoryComponent } from '../components/chat-history/chat-history.co
 import { ChatListComponent } from '../components/chat-list/chat-list.component';
 
 @Component({
-  selector: 'chat-page',
-  standalone: true,
-  imports: [ChatHeaderComponent, ChatListComponent, ChatHistoryComponent],
-  templateUrl: './chat-page.component.html',
-  styleUrl: './chat-page.component.scss'
+    selector: 'chat-page',
+    imports: [ChatHeaderComponent, ChatListComponent, ChatHistoryComponent],
+    templateUrl: './chat-page.component.html',
+    styleUrl: './chat-page.component.scss'
 })
 export class ChatPageComponent {
     constructor() {

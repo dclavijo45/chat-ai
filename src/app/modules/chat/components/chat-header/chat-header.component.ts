@@ -5,14 +5,13 @@ import { ThemeColorDirective } from '../../../../shared/directives/theme-color.d
 
 @Component({
     selector: 'chat-header',
-    standalone: true,
     imports: [
         CommonModule,
         ThemeColorDirective
     ],
     templateUrl: './chat-header.component.html',
     styleUrl: './chat-header.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatHeaderComponent {
     constructor(){

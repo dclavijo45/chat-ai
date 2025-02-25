@@ -19,11 +19,10 @@ import { SocketService } from '../../services/socket.service';
 
 @Component({
     selector: 'chat-list',
-    standalone: true,
     imports: [CommonModule, ThemeColorDirective],
     templateUrl: `./chat-list.component.html`,
     styleUrl: './chat-list.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChatListComponent implements OnInit {
     constructor() {
