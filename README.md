@@ -1,7 +1,7 @@
 Chat AI using Google Gemini, OpenAi API, Anthropic (Claude AI), DeepSeek, QwenAI and Mistral switchable
 =======
 
-Angular 18 and NodeJS with Express has been used for build the project
+Angular 19 and NodeJS with Express has been used for build the project
 
 Requirements:
 ---------------
