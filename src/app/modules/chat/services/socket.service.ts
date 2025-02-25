@@ -1,14 +1,13 @@
 import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Socket } from 'ngx-socket-io';
+import { Observable, Subject } from 'rxjs';
 import {
     IGlobalWSRequestResponse,
     IMessageWSRequest,
     IMessageWSResponse,
-    IPingPongPayloadRequest,
-    StateMessageWSEnum,
+    IPingPongPayloadRequest
 } from '../interfaces/socket.model';
-import { Observable, Subject } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable({
     providedIn: 'root',
@@ -17,14 +16,10 @@ export class SocketService {
     constructor() {
         this.socket = inject(Socket);
 
-        this.dispatchMessage = signal<IMessageWSResponse>({
-            conversationId: '',
-            messageChunk: '',
-            state: StateMessageWSEnum.START,
-        });
+        this.dispatchMessage = new Subject<IMessageWSResponse>();
         this.dispatchIsConnected = signal<boolean>(false);
 
-        this.listenMessage = toObservable(this.dispatchMessage);
+        this.listenMessage = this.dispatchMessage.asObservable();
         this.listenIsConnected = toObservable(this.dispatchIsConnected);
 
         this.timerPing = 0;
@@ -38,7 +33,7 @@ export class SocketService {
     /**
      * @description Signal for dispatching message
      */
-    private dispatchMessage: WritableSignal<IMessageWSResponse>;
+    private dispatchMessage: Subject<IMessageWSResponse>;
 
     /**
      * @description Signal for dispatching connection status
@@ -57,7 +52,7 @@ export class SocketService {
         this.socket
             .fromEvent<IGlobalWSRequestResponse<IMessageWSResponse>>('message')
             .subscribe((response) => {
-                this.dispatchMessage.update(() => response.payload);
+                this.dispatchMessage.next(response.payload);
             });
 
         this.socket.fromEvent('connect').subscribe(() => {

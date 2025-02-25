@@ -115,11 +115,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     private $destroy: Subscription;
 
     /**
-     * Flag if is streaming a chat server response
-     */
-    isStreaming: Signal<boolean>;
-
-    /**
      * Change detector reference to update the view
      */
     private cdr: ChangeDetectorRef;
@@ -133,6 +128,11 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
      * Service to manage the socket connection
      */
     private socketService: SocketService;
+
+    /**
+     * Flag if is streaming a chat server response
+     */
+    isStreaming: Signal<boolean>;
 
     /**
      * Flag if the server is connected
