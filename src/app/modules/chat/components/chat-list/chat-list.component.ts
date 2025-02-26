@@ -15,7 +15,6 @@ import { ThemeColorService } from '../../../../shared/services/theme-color.servi
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
-import { SocketService } from '../../services/socket.service';
 
 @Component({
     selector: 'chat-list',
