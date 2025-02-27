@@ -15,97 +15,72 @@ export class NotifyService {
         });
     }
 
+    /**
+     * @description Instance of Notify class from simple-notify library
+     */
     private Notify: typeof Notify | null;
 
     /**
-     * Muestra una notificación de error
-     * @param text texto de la notificación
-     * @param title titulo de la notificación (opcional)
+     * @description Show a notification with the specified parameters
+     * @param status type of notification
+     * @param text text of the notification
+     * @param title title of the notification (optional)
+     */
+    private notify(
+        status: 'error' | 'success' | 'warning' | 'info',
+        text: string,
+        title: string | undefined = undefined
+    ): void {
+        if (this.Notify) {
+            new this.Notify({
+                status,
+                title,
+                text,
+                effect: 'fade',
+                speed: 300,
+                showIcon: true,
+                showCloseButton: false,
+                autoclose: true,
+                autotimeout: 3000,
+                type: 'outline',
+                position: 'right top',
+            });
+        }
+    }
+
+    /**
+     * @description Show a notification of error
+     * @param text text of the notification
+     * @param title title of the notification (optional)
      */
     error(text: string, title: string | undefined = undefined): void {
-        if (this.Notify) {
-            new this.Notify({
-                status: 'error',
-                title,
-                text,
-                effect: 'fade',
-                speed: 300,
-                showIcon: true,
-                showCloseButton: false,
-                autoclose: true,
-                autotimeout: 5000,
-                type: 'outline',
-                position: 'right top',
-            });
-        }
+        this.notify('error', text, title);
     }
 
     /**
-     * Muestra una notificación de éxito
-     * @param text texto de la notificación
-     * @param title titulo de la notificación (opcional)
+     * @description Show a notification of success
+     * @param text text of the notification
+     * @param title title of the notification (optional)
      */
     success(text: string, title: string | undefined = undefined): void {
-        if (this.Notify) {
-            new this.Notify({
-                status: 'success',
-                title,
-                text,
-                effect: 'fade',
-                speed: 300,
-                showIcon: true,
-                showCloseButton: false,
-                autoclose: true,
-                autotimeout: 3000,
-                type: 'outline',
-                position: 'right top',
-            });
-        }
+        this.notify('success', text, title);
     }
 
     /**
-     * Muestra una notificación de advertencia
-     * @param text texto de la notificación
-     * @param title titulo de la notificación (opcional)
+     * @description Show a notification of warning
+     * @param text text of the notification
+     * @param title title of the notification (optional)
      */
     warning(text: string, title: string | undefined = undefined): void {
-        if (this.Notify) {
-            new this.Notify({
-                status: 'warning',
-                title,
-                text,
-                effect: 'fade',
-                speed: 300,
-                showIcon: true,
-                showCloseButton: false,
-                autoclose: true,
-                autotimeout: 3000,
-                type: 'outline',
-                position: 'right top',
-            });
-        }
+        this.notify('warning', text, title);
     }
 
     /**
-     * Muestra una notificación de información
-     * @param text texto de la notificación
-     * @param title titulo de la notificación (opcional)
+     * @description Show a notification of info
+     * @param text text of the notification
+     * @param title title of the notification (optional)
      */
     info(text: string, title: string | undefined = undefined): void {
-        if (this.Notify) {
-            new this.Notify({
-                status: 'info',
-                title,
-                text,
-                effect: 'fade',
-                speed: 300,
-                showIcon: true,
-                showCloseButton: false,
-                autoclose: true,
-                autotimeout: 3000,
-                type: 'outline',
-                position: 'right top',
-            });
-        }
+        this.notify('info', text, title);
     }
 }

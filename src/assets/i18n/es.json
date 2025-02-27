@@ -1,0 +1,22 @@
+{
+    "chat": {
+        "chat-list": {
+            "new-chat": "Nuevo chat",
+            "conversation": "Conversación",
+            "cant-change-chat-while-streaming": "No puedes cambiar de chat mientras está en espera de respuesta",
+            "cant-change-model-while-streaming": "No puedes cambiar de modelo mientras está en espera de respuesta",
+            "cant-change-model-started-chat": "No puedes cambiar de modelo ai en una conversación ya comenzada",
+            "cant-add-chat-while-streaming": "No puedes agregar un chat mientras está en espera de respuesta",
+            "cant-add-conversation-before-start-chat": "No puedes agregar un chat hasta que el chat actual haya comenzado"
+        },
+        "chat-history": {
+            "user-photo": "Foto de usuario",
+            "img-selected-by-user": "Imagen seleccionada por el usuario",
+            "title-can-help-you-today": "¿En qué puedo ayudarte hoy?",
+            "send-a-message": "Enviar un mensaje...",
+            "current-model-not-support-img" : "El modelo de IA actual no soporta imágenes",
+            "support-max-files-number": "Solo se permiten máximo {{maxFiles}} imágenes",
+            "image-size-exceeds-limit": "La imagen {{fileName}} supera el tamaño máximo ({{maxFileSize}}MB)"
+        }
+    }
+}

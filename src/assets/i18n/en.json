@@ -1,0 +1,22 @@
+{
+    "chat": {
+        "chat-list": {
+            "new-chat": "New chat",
+            "conversation": "Conversation",
+            "cant-change-chat-while-streaming": "You can't change chat while waiting for a response",
+            "cant-change-model-while-streaming": "You can't change model while waiting for a response",
+            "cant-change-model-started-chat": "You can't change ai model in a conversation already started",
+            "cant-add-chat-while-streaming": "You can't add a chat while waiting for a response",
+            "cant-add-conversation-before-start-chat": "You can't add a chat until the current chat has started"
+        },
+        "chat-history": {
+            "user-photo": "User photo",
+            "img-selected-by-user": "Image selected by the user",
+            "title-can-help-you-today": "How can I help you today?",
+            "send-a-message": "Send a message...",
+            "current-model-not-support-img" : "The current AI model does not support images",
+            "support-max-files-number": "Only maximum {{maxFiles}} images are allowed",
+            "image-size-exceeds-limit": "The image {{fileName}} exceeds the maximum size ({{maxFileSize}}MB)"
+        }
+    }
+}

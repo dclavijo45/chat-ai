@@ -1,15 +1,6 @@
-import {
-    Injectable,
-    WritableSignal,
-    inject,
-    signal
-} from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import {
-    IHRole,
-    PartHistory,
-    TypePartEnum
-} from '../interfaces/history.model';
+import { Injectable, WritableSignal, inject, signal } from '@angular/core';
+import { firstValueFrom, lastValueFrom, Observable, Subject } from 'rxjs';
+import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NotifyService } from '../../../shared/services/notify.service';
@@ -17,6 +8,7 @@ import { AiEngineEnum } from '../enums/ai-engine.enum';
 import { IChat } from '../interfaces/chat.model';
 import { StateMessageWSEnum } from '../interfaces/socket.model';
 import { SocketService } from './socket.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
     providedIn: 'root',
@@ -25,6 +17,7 @@ export class ChatService {
     constructor() {
         this.notifyService = inject(NotifyService);
         this.socketService = inject(SocketService);
+        this.translateService = inject(TranslateService);
 
         this.dispathChatChunk = new Subject<string>();
         this.chatChunkStream = this.dispathChatChunk.asObservable();
@@ -45,7 +38,7 @@ export class ChatService {
     }
 
     /**
-     * Notify service for show messages to user
+     * @description Notify service for show messages to user
      */
     private notifyService: NotifyService;
 
@@ -55,32 +48,37 @@ export class ChatService {
     private socketService: SocketService;
 
     /**
-     * Subject to dispatch chat chunk
+     * @description Translate service for translate messages
+     */
+    private translateService: TranslateService;
+
+    /**
+     * @description Subject to dispatch chat chunk
      */
     private dispathChatChunk: Subject<string>;
 
     /**
-     * Signal to dispatch chat list
+     * @description Signal to dispatch chat list
      */
     private dispathChatList: WritableSignal<IChat[]>;
 
     /**
-     * Signal to dispatch chat id selected
+     * @description Signal to dispatch chat id selected
      */
     private dispathChatSelect: WritableSignal<string>;
 
     /**
-     * Signal to dispatch AI engine
+     * @description Signal to dispatch AI engine
      */
     private dispatchAiEngine: WritableSignal<AiEngineEnum>;
 
     /**
-     * Signal to dispatch if is streaming a chat server response
+     * @description Signal to dispatch if is streaming a chat server response
      */
     private dispatchIsStreaming: WritableSignal<boolean>;
 
     /**
-     * Listen message from socket service
+     * @description Listen message from socket service
      */
     private listenMessage(): void {
         // store chunk message temporary
@@ -120,40 +118,41 @@ export class ChatService {
     }
 
     /**
-     * Observable to get chat chunk
+     * @description Observable to get chat chunk
      */
     chatChunkStream: Observable<string>;
 
     /**
-     * Observable to get chat list
+     * @description Observable to get chat list
      */
     chatList: Observable<IChat[]>;
 
     /**
-     * Observable to get chat select
+     * @description Observable to get chat select
      */
     chatSelect: Observable<string>;
 
     /**
-     * Observable to get AI engine
+     * @description Observable to get AI engine
      */
     aiEngine: Observable<AiEngineEnum>;
 
     /**
-     * Observable to get if is streaming
+     * @description Observable to get if is streaming
      */
     isStreaming: Observable<boolean>;
 
     /**
-     * Select a chat by chat id
+     * @description Select a chat by chat id
      *
      * @param chatId chat id to chat to select
      */
     selectChat(chatId: string): void {
         if (this.dispatchIsStreaming()) {
-            this.notifyService.warning(
-                'No puedes cambiar de chat mientras está en espera de respuesta'
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-change-chat-while-streaming'
             );
+            this.notifyService.warning(textTranslation);
             return;
         }
 
@@ -175,15 +174,16 @@ export class ChatService {
     }
 
     /**
-     * Select a ai engine
+     * @description Select a ai engine
      *
      * @param engine AI engine enum selected
      */
-    setAiEngine(engine: AiEngineEnum): void {
+    async setAiEngine(engine: AiEngineEnum): Promise<void> {
         if (this.dispatchIsStreaming()) {
-            this.notifyService.warning(
-                'No puedes cambiar de modelo mientras está en espera de respuesta'
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-change-model-while-streaming'
             );
+            this.notifyService.warning(textTranslation);
             return;
         }
 
@@ -198,9 +198,10 @@ export class ChatService {
         }
 
         if (chatSelected.history.length) {
-            this.notifyService.warning(
-                'No puedes cambiar de modelo ai en una conversación ya comenzada'
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-change-model-started-chat'
             );
+            this.notifyService.warning(textTranslation);
             return;
         }
 
@@ -210,13 +211,14 @@ export class ChatService {
     }
 
     /**
-     * Add a chat to chat list and select it
+     * @description Add a chat to chat list and select it
      */
-    addChat(): void {
+    async addChat(): Promise<void> {
         if (this.dispatchIsStreaming()) {
-            this.notifyService.warning(
-                'No puedes agregar un chat mientras está en espera de respuesta'
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-add-chat-while-streaming'
             );
+            this.notifyService.warning(textTranslation);
             return;
         }
 
@@ -225,9 +227,10 @@ export class ChatService {
                 !this.dispathChatList()[this.dispathChatList().length - 1]
                     .history.length
             ) {
-                this.notifyService.error(
-                    'No puedes agregar un chat hasta que el chat actual haya comenzado'
+                const textTranslation = this.translateService.instant(
+                    'chat.chat-list.cant-add-conversation-before-start-chat'
                 );
+                this.notifyService.error(textTranslation);
                 return;
             }
         }
@@ -248,7 +251,7 @@ export class ChatService {
     }
 
     /**
-     * Starts chat-conversation
+     * @description Starts chat-conversation
      *
      * @param parts user messages to send to AI
      */
@@ -292,7 +295,7 @@ export class ChatService {
     }
 
     /**
-     * Send user message to current chat history conversation
+     * @description Send user message to current chat history conversation
      *
      * @param parts user messages to send to AI
      */

@@ -144,7 +144,15 @@ main.dark {
     background-color: var(--bg-color-1-dark);
 }
 
-.theme-color-icon {
+footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-items: stretch;
+    align-items: center;
+}
+
+footer i {
+    width: max-content;
     font-size: 30px;
     color: #2f2f2f;
     cursor: pointer;
@@ -153,14 +161,31 @@ main.dark {
     transition: background-color 100ms ease-in-out;
 }
 
-.theme-color-icon.dark {
+footer i {
+    font-size: 30px;
+    color: #2f2f2f;
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 9999px;
+    transition: background-color 100ms ease-in-out;
+}
+
+footer i:first-child {
+    justify-self: start;
+}
+
+footer i:last-child {
+    justify-self: end;
+}
+
+footer i.dark {
     color: whitesmoke;
 }
 
-.theme-color-icon:hover {
+footer i:hover {
     background-color: #ececec;
 }
 
-.theme-color-icon.dark:hover {
+footer i.dark:hover {
     background-color: #2f2f2f;
 }

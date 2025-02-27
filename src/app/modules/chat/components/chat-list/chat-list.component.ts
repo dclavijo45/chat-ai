@@ -3,7 +3,7 @@ import {
     Component,
     OnInit,
     Signal,
-    inject
+    inject,
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -15,18 +15,28 @@ import { ThemeColorService } from '../../../../shared/services/theme-color.servi
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
+import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { I18nLanguage } from '../../../../shared/interfaces/i18n.model';
+import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 
 @Component({
     selector: 'chat-list',
-    imports: [CommonModule, ThemeColorDirective],
+    imports: [
+        CommonModule,
+        ThemeColorDirective,
+        ContextMenuModule,
+        TranslateModule,
+    ],
     templateUrl: `./chat-list.component.html`,
     styleUrl: './chat-list.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatListComponent implements OnInit {
     constructor() {
         this.chatService = inject(ChatService);
         this.themeColorService = inject(ThemeColorService);
+        this.translateService = inject(TranslateService);
 
         this.chatList = toSignal(this.chatService.chatList, {
             initialValue: [],
@@ -44,40 +54,59 @@ export class ChatListComponent implements OnInit {
     }
 
     /**
-     * Service for managing chat data api
+     * @description Service for managing chat data api
      */
     private chatService: ChatService;
 
     /**
-     * Service for managing theme color design
+     * @description Translate service for the app
+     */
+    private translateService: TranslateService;
+
+    /**
+     * @description Service for managing theme color design
      */
     themeColorService: ThemeColorService;
 
     /**
-     * List of chat data
+     * @description List of chat data
      */
     chatList: Signal<IChat[]>;
 
     /**
-     * Selected chat id
+     * @description Selected chat id
      */
     chatSelected: Signal<string>;
 
     /**
-     * Selected chat ai engine
+     * @description Selected chat ai engine
      */
     aiEngine: Signal<AiEngineEnum>;
 
     /**
-     * Enum for ai engine
+     * @description Enum for ai engine
      */
     AiEngineEnum: typeof AiEngineEnum;
 
     /**
-     * Getter for theme color
+     * @description Getter for theme color
      */
     get themeColor(): Observable<ThemeColorEnum> {
         return this.themeColorService.themeColor;
+    }
+
+    /**
+     * @description Languages list
+     */
+    get languages(): I18nLanguage[] {
+        return i18nConstant.LANGUAGES;
+    }
+
+    /**
+     * @description Current language
+     */
+    get currentLanguage(): string {
+        return this.translateService.currentLang;
     }
 
     ngOnInit(): void {
@@ -85,14 +114,23 @@ export class ChatListComponent implements OnInit {
     }
 
     /**
-     * Add new chat to chat list
+     * @description Change language
+     *
+     * @param language Language to set
+     */
+    changeLanguage(language: I18nLanguage): void {
+        this.translateService.use(language.code);
+    }
+
+    /**
+     * @description Add new chat to chat list
      */
     addChat(): void {
         this.chatService.addChat();
     }
 
     /**
-     * Select chat by id
+     * @description Select chat by id
      *
      * @param chatId - chat id to select
      */
@@ -101,14 +139,14 @@ export class ChatListComponent implements OnInit {
     }
 
     /**
-     * Toggle theme color between available designs
+     * @description Toggle theme color between available designs
      */
     toggleThemeColor(): void {
         this.themeColorService.toggleThemeColor();
     }
 
     /**
-     * Set ai engine for selected chat
+     * @description Set ai engine for selected chat
      *
      * @param engine - ai engine to set
      */

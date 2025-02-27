@@ -1,5 +1,5 @@
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { Injectable, afterNextRender } from '@angular/core';
+import { afterNextRender, Injectable } from '@angular/core';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
 import { ThemeColorEnum } from '../enums/theme-color.enum';
 
@@ -29,10 +29,20 @@ export class ThemeColorService {
         });
     }
 
+    /**
+     * @description Signal for dispatching theme color
+     */
     private dispathThemeColor: BehaviorSubject<ThemeColorEnum>;
 
+    /**
+     * @description Observable for theme color
+     */
     themeColor: Observable<ThemeColorEnum>;
 
+    /**
+     * @description Toggle theme color between light and dark
+     * @param event media query list event
+     */
     async toggleThemeColor(event?: MediaQueryListEvent): Promise<void> {
         if (event) {
             return this.dispathThemeColor.next(
@@ -40,13 +50,7 @@ export class ThemeColorService {
             );
         }
 
-        let $: Subscription;
-
-        const currentTheme = await new Promise<ThemeColorEnum>((resolve) => {
-            $ = this.themeColor.subscribe((themeC) => resolve(themeC));
-        });
-
-        $!.unsubscribe();
+        const currentTheme = await firstValueFrom(this.themeColor);
 
         this.dispathThemeColor.next(
             currentTheme == ThemeColorEnum.dark

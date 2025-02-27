@@ -22,6 +22,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MarkdownModule } from 'ngx-markdown';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { NotifyService } from '../../../../shared/services/notify.service';
@@ -46,10 +47,11 @@ import { SocketService } from '../../services/socket.service';
         ToggleChunkChatPipe,
         ThemeColorDirective,
         MarkdownModule,
+        TranslateModule,
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatHistoryComponent implements OnInit, OnDestroy {
     constructor() {
@@ -57,6 +59,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         this.cdr = inject(ChangeDetectorRef);
         this.notifyService = inject(NotifyService);
         this.socketService = inject(SocketService);
+        this.translateService = inject(TranslateService);
 
         this.userInputPrompt = new FormControl<string | null>('', [
             Validators.required,
@@ -100,77 +103,82 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Html element reference to the chat history list
+     * @description Html element reference to the chat history list
      */
     @ViewChild('historyList') historyList!: ElementRef<HTMLDivElement>;
 
     /**
-     * Service to manage chat history
+     * @description Service to manage chat history
      */
     private chatService: ChatService;
 
     /**
-     * Subscription to destroy observables
+     * @description Subscription to destroy observables
      */
     private $destroy: Subscription;
 
     /**
-     * Change detector reference to update the view
+     * @description Change detector reference to update the view
      */
     private cdr: ChangeDetectorRef;
 
     /**
-     * Service to notify messages to the user
+     * @description Service to notify messages to the user
      */
     private notifyService: NotifyService;
 
     /**
-     * Service to manage the socket connection
+     * @description Service to manage the socket connection
      */
     private socketService: SocketService;
 
     /**
-     * Flag if is streaming a chat server response
+     * @description Service to manage the translations
+     */
+    private translateService: TranslateService;
+
+    /**
+     * @description Flag if is streaming a chat server response
      */
     isStreaming: Signal<boolean>;
 
     /**
-     * Flag if the server is connected
+     * @description Flag if the server is connected
      */
     isServerConnected: Signal<boolean>;
 
     /**
-     * Chat history signal to manage the chat history
+     * @description Chat history signal to manage the chat history
      */
     chatHistory: WritableSignal<IChat>;
 
     /**
-     * Chat chunk stream signal to manage the chat chunk stream
+     * @description Chat chunk stream signal to manage the chat chunk stream
      */
     chatChunkStream: Signal<string>;
 
     /**
-     * User input prompt form control
+     * @description User input prompt form control
      */
     userInputPrompt: FormControl<string | null>;
 
     /**
-     * List of images selected by user to send to the chat server
+     * @description List of images selected by user to send to the chat server
      */
     imagesList: WritableSignal<IChatImage[]>;
 
     /**
-     * Enum to manage the type of part in the chat history
+     * @description Enum to manage the type of part in the chat history
      */
     TypePartEnum: typeof TypePartEnum;
 
     /**
-     * Enum to manage the role of the part in the chat history
+     * @description Enum to manage the role of the part in the chat history
      */
     IHRole: typeof IHRole;
 
     /**
-     * Selected chat ai engine
+     * @description Selected chat ai engine
      */
     aiEngine: Signal<AiEngineEnum>;
 
@@ -208,12 +216,20 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         );
 
         this.$destroy.add(
-            this.chatService.aiEngine.subscribe((aiEngine) => {
-                if (aiEngine == AiEngineEnum.deepseek) {
+            this.chatService.aiEngine.subscribe(async (aiEngine) => {
+                if (
+                    [
+                        AiEngineEnum.deepseek,
+                        AiEngineEnum.qwenai,
+                        AiEngineEnum.mistral,
+                    ].includes(aiEngine)
+                ) {
                     if (this.imagesList().length) {
-                        this.notifyService.error(
-                            'El modelo de IA actual no soporta imágenes, se limpiará la lista de imágenes seleccionadas'
+                        const textTranslation = this.translateService.instant(
+                            'chat.chat-history.current-model-not-support-img'
                         );
+
+                        this.notifyService.error(textTranslation);
 
                         this.imagesList.set([]);
                     }
@@ -233,7 +249,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Send message to the chat server
+     * @description Send message to the chat server
      *
      * @param e Event to prevent default enter space
      */
@@ -280,7 +296,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Scroll to the bottom of the chat history list
+     * @description Scroll to the bottom of the chat history list
      */
     scrollHistory(): void {
         setTimeout(() => {
@@ -290,19 +306,23 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Load images from the input file
+     * @description Load images from the input file
      *
      * @param inputFile Input file to load images
      */
     loadImages(inputFile: HTMLInputElement): void {
         if (
-            this.aiEngine() == AiEngineEnum.deepseek ||
-            this.aiEngine() == AiEngineEnum.qwenai ||
-            this.aiEngine() == AiEngineEnum.mistral
+            [
+                AiEngineEnum.deepseek,
+                AiEngineEnum.qwenai,
+                AiEngineEnum.mistral,
+            ].includes(this.aiEngine())
         ) {
-            this.notifyService.error(
-                'El modelo de IA actual no soporta imágenes'
+            const textTranslation = this.translateService.instant(
+                'chat.chat-history.current-model-not-support-img'
             );
+
+            this.notifyService.error(textTranslation);
             return;
         }
 
@@ -310,7 +330,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Select files from the input file and add to the images list
+     * @description Select files from the input file and add to the images list
      *
      * @param e Event to get the files from the input file
      * @returns
@@ -323,9 +343,14 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         if (!files.length) return;
 
         if (files.length > maxFiles) {
-            this.notifyService.error(
-                `Solo se permiten máximo ${maxFiles} imágenes`
+            const textTranslation = this.translateService.instant(
+                'chat.chat-history.support-max-files-number',
+                {
+                    maxFiles,
+                }
             );
+
+            this.notifyService.error(textTranslation);
             return;
         }
 
@@ -333,11 +358,15 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
         for (const file of files) {
             if (file.size > maxFileSize) {
-                this.notifyService.error(
-                    `La imagen ${file.name} supera el tamaño máximo (${
-                        maxFileSize / 1024 / 1024
-                    }MB)`
+                const textTranslation = this.translateService.instant(
+                    'chat.chat-history.image-size-exceeds-limit',
+                    {
+                        fileName: file.name,
+                        maxFileSize: maxFileSize / 1024 / 1024,
+                    }
                 );
+
+                this.notifyService.error(textTranslation);
                 continue;
             }
 
@@ -377,7 +406,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Remove image from the images list
+     * @description Remove image from the images list
      *
      * @param image Image to remove from the images list
      */

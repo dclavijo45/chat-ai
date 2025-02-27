@@ -15,8 +15,14 @@ export class ChatPageComponent {
         this.toggleChatList = false;
     }
 
+    /**
+     * @description Toggle state chat list
+     */
     toggleChatList: boolean;
 
+    /**
+     * @description Toggle chat list
+     */
     toggleChatListM(): void {
         this.toggleChatList = !this.toggleChatList;
     }

@@ -30,6 +30,7 @@
                         ],
                         "styles": [
                             "src/styles.scss",
+                            "./node_modules/@perfectmemory/ngx-contextmenu/src/assets/stylesheets/base.scss",
                             "node_modules/simple-notify/dist/simple-notify.css",
                             "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.css",
                             "node_modules/prism-themes/themes/prism-one-dark.min.css",
@@ -43,20 +44,23 @@
                             "node_modules/prismjs/components/prism-typescript.min.js",
                             "node_modules/prismjs/components/prism-javascript.min.js",
                             "node_modules/prismjs/components/prism-python.min.js"
-
                         ],
                         "server": "src/main.server.ts",
                         "prerender": true,
                         "ssr": {
                             "entry": "server.ts"
-                        }
+                        },
+                        "allowedCommonJsDependencies": [
+                            "debug",
+                            "xmlhttprequest-ssl"
+                        ]
                     },
                     "configurations": {
                         "production": {
                             "budgets": [
                                 {
                                     "type": "initial",
-                                    "maximumWarning": "500kb",
+                                    "maximumWarning": "1mb",
                                     "maximumError": "1mb"
                                 },
                                 {
@@ -118,6 +122,6 @@
         }
     },
     "cli": {
-      "analytics": false
+        "analytics": false
     }
 }

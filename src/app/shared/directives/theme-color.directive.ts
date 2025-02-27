@@ -23,10 +23,24 @@ export class ThemeColorDirective implements OnInit, OnDestroy {
         this.destroy$ = new Subscription();
     }
 
+    /**
+     * @description Theme color service for managing theme color
+     */
     private themeColorService: ThemeColorService;
+
+    /**
+     * @description Element reference for accessing the html element
+     */
     private elementRef: ElementRef;
+
+    /**
+     * @description Renderer2 for manipulating the html element
+     */
     private renderer2: Renderer2;
 
+    /**
+     * @description Subscription for unsubscribing the observable
+     */
     private destroy$: Subscription;
 
     ngOnInit(): void {

@@ -6,7 +6,7 @@ import {
     IGlobalWSRequestResponse,
     IMessageWSRequest,
     IMessageWSResponse,
-    IPingPongPayloadRequest
+    IPingPongPayloadRequest,
 } from '../interfaces/socket.model';
 
 @Injectable({
@@ -57,19 +57,11 @@ export class SocketService {
 
         this.socket.fromEvent('connect').subscribe(() => {
             this.dispatchIsConnected.update(() => true);
-            console.log('connected socket server');
-
-            if (this.timerPing) {
-                clearInterval(this.timerPing);
-                this.timerPing = 0;
-            }
-
             this.triggerPing();
         });
 
         this.socket.fromEvent('disconnect').subscribe(() => {
             this.dispatchIsConnected.update(() => false);
-            console.log('disconnected socket server');
 
             clearInterval(this.timerPing);
             this.timerPing = 0;
@@ -93,6 +85,11 @@ export class SocketService {
      * @description Trigger the ping to the socket server
      */
     private triggerPing(): void {
+        if (this.timerPing) {
+            clearInterval(this.timerPing);
+            this.timerPing = 0;
+        }
+
         this.timerPing = Number(
             setInterval(() => {
                 this.sendPing();
@@ -126,7 +123,6 @@ export class SocketService {
         const request: IGlobalWSRequestResponse<IMessageWSRequest> = {
             payload: messages,
         };
-
         this.socket.emit('message', request);
     }
 }

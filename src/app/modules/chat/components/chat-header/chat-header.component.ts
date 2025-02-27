@@ -20,10 +20,19 @@ export class ChatHeaderComponent {
         this.toggleChatListV = false;
     }
 
+    /**
+     * @description Emits an event to toggle the chat list
+     */
     @Output() toggleChatListE: EventEmitter<void>;
 
+    /**
+     * @description Toggles state the chat list
+     */
     toggleChatListV: boolean;
-    
+
+    /**
+     * @description Toggles the chat list
+     */
     toggleChatList(): void {
         this.toggleChatListV = !this.toggleChatListV;
         this.toggleChatListE.emit();

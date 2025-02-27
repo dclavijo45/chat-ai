@@ -21,10 +21,11 @@
                 alt="Logo qwen" width="24" height="24" title="Qwen" (click)="setEngine(AiEngineEnum.qwenai)" themeColor>
 
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.mistral" src="/assets/img/mistral-logo.png"
-                alt="Logo mistral" width="24" height="24" title="Mistral" (click)="setEngine(AiEngineEnum.mistral)" themeColor>
+                alt="Logo mistral" width="24" height="24" title="Mistral" (click)="setEngine(AiEngineEnum.mistral)"
+                themeColor>
         </div>
 
-        <span class="text-new" (click)="addChat()" themeColor>Nuevo chat <i class="material-icons-outlined add-icon"
+        <span class="text-new" (click)="addChat()" themeColor>{{ 'chat.chat-list.new-chat' | translate }} <i class="material-icons-outlined add-icon"
                 themeColor>add</i></span>
     </div>
 
@@ -33,13 +34,24 @@
 
         <div *ngFor="let chat of chatList(); index as i" class="chat-element" [class.active]="chatSelected() == chat.id"
             (click)="selectChat(chat.id)" themeColor>
-            Conversación #{{ i + 1 }}
+            {{ 'chat.chat-list.conversation' | translate }} #{{ i + 1 }}
         </div>
     </div>
 
-    <div class="theme-color">
+    <footer>
         <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()" themeColor>{{
             (themeColor | async) ==
             'light' ? 'dark_mode' : 'light_mode' }}</i>
-    </div>
+
+        <i class="material-icons-outlined" #ngxContextMenu="ngxContextMenu" [contextMenu]="oneContextMenu"
+            (click)="ngxContextMenu?.open($event)" themeColor>
+            translate
+        </i>
+    </footer>
 </main>
+
+<context-menu #oneContextMenu>
+    <ng-template contextMenuItem *ngFor="let language of languages" [disabled]="language.code == currentLanguage"
+        (execute)="changeLanguage(language)">{{
+        language.name }}</ng-template>
+</context-menu>

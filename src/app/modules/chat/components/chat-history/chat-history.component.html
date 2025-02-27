@@ -6,12 +6,14 @@
                     <div class="chat-element">
                         <img class="chat-element-img"
                             src="/assets/img/{{chat.role == IHRole.user ? 'user' : 'logo'}}.png"
-                            alt="user photo" width="34" height="34">
+                            [alt]="'chat.chat-history.user-photo' | translate" width="34" height="34">
 
                         @switch (part.type) {
                             @case (TypePartEnum.image) {
                                 <img class="chat-element-img-user"
-                                    [src]="part.text" alt="Img selected by user" width="150">
+                                    [src]="part.text"
+                                    [alt]="'chat.chat-history.img-selected-by-user' | translate"
+                                    width="150">
                             }
 
                             @case (TypePartEnum.text) {
@@ -36,8 +38,9 @@
         @if (chatHistory().history.length == 0) {
             <div class="start">
                 <img class="logo" src="/assets/img/logo.gif" alt="Logo chat-ai" width="34" height="34">
-                <h2 class="title" themeColor>¿En que puedo ayudarte
-                    hoy?</h2>
+                <h2 class="title" themeColor>
+                    {{ 'chat.chat-history.title-can-help-you-today' | translate }}
+                </h2>
             </div>
         }
     </div>
@@ -47,7 +50,8 @@
             @for (image of imagesList(); track $index) {
                 <div class="image-selected-box" (click)="removeImage(image)">
                     <img class="image-selected"
-                        [src]="image.base64" [alt]="'Image selected by user: ' + image.name"
+                        [src]="image.base64"
+                        [alt]="('chat.chat-history.img-selected-by-user' | translate) + ': ' + image.name"
                         width="45" height="45">
                     <i class="material-icons-outlined delete-image-icon">delete</i>
                 </div>
@@ -63,7 +67,8 @@
                 multiple>
 
             <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"
-                placeholder="Envía un mensaje..." class="scroll-1" themeColor autofocus></textarea>
+                [placeholder]="'chat.chat-history.send-a-message' | translate"
+                class="scroll-1" themeColor autofocus></textarea>
 
             <i class="material-icons-outlined input-icon" (click)="sendMessage($event)"
                 [class.active]="userInputPrompt.valid && isServerConnected() && !isStreaming()" themeColor>arrow_upward</i>
