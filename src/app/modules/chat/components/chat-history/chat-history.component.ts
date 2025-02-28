@@ -256,6 +256,8 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     async sendMessage(e: Event): Promise<void> {
         e.preventDefault();
 
+        if (!this.isServerConnected()) return;
+
         if (this.isStreaming()) return;
 
         if (this.userInputPrompt.invalid) return;

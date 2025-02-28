@@ -7,7 +7,7 @@ import {
 import {
     provideHttpClient,
     withFetch,
-    withInterceptorsFromDi
+    withInterceptorsFromDi,
 } from '@angular/common/http';
 import {
     provideClientHydration,
@@ -15,7 +15,8 @@ import {
     withIncrementalHydration,
 } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { provideMarkdown } from 'ngx-markdown';
+import { MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
+import { markdownRendererFactory } from '../shared/factories/markdown-renderer.factory';
 import { providers } from './app.providers';
 import { routes } from './app.routes';
 
@@ -26,6 +27,11 @@ export const appConfig: ApplicationConfig = {
         provideClientHydration(withIncrementalHydration(), withEventReplay()),
         importProvidersFrom(providers),
         provideHttpClient(withFetch(), withInterceptorsFromDi()),
-        provideMarkdown(),
+        provideMarkdown({
+            markedOptions: {
+                provide: MARKED_OPTIONS,
+                useFactory: markdownRendererFactory
+            },
+        }),
     ],
 };
