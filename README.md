@@ -1,4 +1,4 @@
-Chat AI using Google Gemini, OpenAi API, Anthropic (Claude AI), DeepSeek, QwenAI and Mistral switchable
+Chat AI using Google Gemini, OpenAi API, Anthropic (Claude AI), DeepSeek, QwenAI, Mistral, Grok and Perplexity switchable
 =======
 
 Angular 19 and NodeJS with Express has been used for build the project
@@ -13,6 +13,8 @@ Requirements:
 - DeepSeek API key
 - QwenAI API key
 - Mistral API key
+- Grok API key
+- Perplexity API key
 
 How to use:
 ---------------

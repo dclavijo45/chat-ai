@@ -14,7 +14,7 @@ main.dark {
     display: grid;
     grid-template-rows: 2fr;
     grid-template-columns: 1fr;
-    height: 90px;
+    height: 110px;
     align-items: center;
     padding: 0.2rem 0.5rem;
     background-color: transparent;
@@ -29,8 +29,8 @@ main.dark {
 .ai-logos {
     display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: repeat(auto-fill, 24px);
-    justify-content: center;
+    grid-template-columns: repeat(4, 24px);
+    justify-content: space-around;
     gap: 13px;
 }
 

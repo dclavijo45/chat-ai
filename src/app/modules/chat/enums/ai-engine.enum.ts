@@ -5,4 +5,6 @@ export enum AiEngineEnum {
     deepseek = 'deepseek',
     qwenai = 'qwenai',
     mistral = 'mistral',
+    grok = 'grok',
+    perplexity = 'perplexity',
 }

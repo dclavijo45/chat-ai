@@ -222,6 +222,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                         AiEngineEnum.deepseek,
                         AiEngineEnum.qwenai,
                         AiEngineEnum.mistral,
+                        AiEngineEnum.perplexity
                     ].includes(aiEngine)
                 ) {
                     if (this.imagesList().length) {
@@ -318,6 +319,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                 AiEngineEnum.deepseek,
                 AiEngineEnum.qwenai,
                 AiEngineEnum.mistral,
+                AiEngineEnum.perplexity
             ].includes(this.aiEngine())
         ) {
             const textTranslation = this.translateService.instant(

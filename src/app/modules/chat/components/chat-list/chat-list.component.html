@@ -23,10 +23,16 @@
             <img class="logo" [class.active]="aiEngine() == AiEngineEnum.mistral" src="/assets/img/mistral-logo.png"
                 alt="Logo mistral" width="24" height="24" title="Mistral" (click)="setEngine(AiEngineEnum.mistral)"
                 themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.grok" src="/assets/img/grok-logo.png"
+                alt="Logo grok" width="24" height="24" title="Grok" (click)="setEngine(AiEngineEnum.grok)" themeColor>
+
+            <img class="logo" [class.active]="aiEngine() == AiEngineEnum.perplexity" src="/assets/img/perplexity-logo.png"
+                alt="Logo perplexity" width="24" height="24" title="Perplexity" (click)="setEngine(AiEngineEnum.perplexity)" themeColor>
         </div>
 
-        <span class="text-new" (click)="addChat()" themeColor>{{ 'chat.chat-list.new-chat' | translate }} <i class="material-icons-outlined add-icon"
-                themeColor>add</i></span>
+        <span class="text-new" (click)="addChat()" themeColor>{{ 'chat.chat-list.new-chat' | translate }} <i
+                class="material-icons-outlined add-icon" themeColor>add</i></span>
     </div>
 
     <div class="chat-list scroll-1">

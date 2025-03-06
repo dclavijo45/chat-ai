@@ -11,7 +11,7 @@ export const markdownRendererFactory = (): MarkedOptions => {
         return `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${text}</a>`;;
     };
     return {
-        renderer: renderer,
+        renderer,
         gfm: true,
         breaks: true,
         pedantic: false,
