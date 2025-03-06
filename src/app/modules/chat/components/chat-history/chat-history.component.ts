@@ -220,7 +220,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                 if (
                     [
                         AiEngineEnum.deepseek,
-                        AiEngineEnum.qwenai,
                         AiEngineEnum.mistral,
                         AiEngineEnum.perplexity
                     ].includes(aiEngine)
@@ -317,7 +316,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         if (
             [
                 AiEngineEnum.deepseek,
-                AiEngineEnum.qwenai,
                 AiEngineEnum.mistral,
                 AiEngineEnum.perplexity
             ].includes(this.aiEngine())
