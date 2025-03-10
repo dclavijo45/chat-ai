@@ -23,7 +23,7 @@ export class ChatService {
 
         this.chatList = signal<IChat[]>([]);
         this.chatSelect = signal('');
-        this.aiEngine = signal(AiEngineEnum.openai);
+        this.aiEngine = signal(AiEngineEnum.grok);
         this.isStreaming = signal(false);
 
         this.listenMessage();

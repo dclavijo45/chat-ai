@@ -108,9 +108,9 @@ export class ChatHistoryComponent {
     }
 
     /**
-     * @description Signal to manage html element reference to the chat history list
+     * @description html element reference to the chat history list
      */
-    historyListSgn: Signal<ElementRef<HTMLDivElement> | undefined> =
+    historyList: Signal<ElementRef<HTMLDivElement> | undefined> =
         viewChild<ElementRef<HTMLDivElement>>('historyList');
 
     /**
@@ -302,7 +302,7 @@ export class ChatHistoryComponent {
      * @param inmediatly Flag to scroll inmediatly to the bottom
      */
     scrollHistory(inmediatly: boolean = false): void {
-        const historyListElement = this.historyListSgn()?.nativeElement;
+        const historyListElement = this.historyList()?.nativeElement;
 
         if (!historyListElement) return;
 
