@@ -71,7 +71,7 @@
                 class="scroll-1" themeColor autofocus></textarea>
 
             <i class="material-icons-outlined input-icon" (click)="sendMessage($event)"
-                [class.active]="userInputPrompt.valid && isServerConnected() && !isStreaming()" themeColor>arrow_upward</i>
+                [class.active]="canSendChat()" themeColor>arrow_upward</i>
         </div>
     </div>
 </main>

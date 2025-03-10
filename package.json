@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --no-hmr",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -29,6 +29,7 @@
     "ngx-cookie-service": "^19.1.2",
     "ngx-markdown": "^19.1.0",
     "ngx-socket-io": "^4.8.1",
+    "ngxtension": "^4.3.2",
     "prism-themes": "^1.9.0",
     "prismjs": "1.28.0",
     "rxjs": "~7.8.0",

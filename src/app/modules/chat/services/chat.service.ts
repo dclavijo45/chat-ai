@@ -1,14 +1,13 @@
-import { Injectable, WritableSignal, inject, signal } from '@angular/core';
-import { firstValueFrom, lastValueFrom, Observable, Subject } from 'rxjs';
+import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
 import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
-import { toObservable } from '@angular/core/rxjs-interop';
+import { TranslateService } from '@ngx-translate/core';
 import { NotifyService } from '../../../shared/services/notify.service';
 import { AiEngineEnum } from '../enums/ai-engine.enum';
 import { IChat } from '../interfaces/chat.model';
 import { StateMessageWSEnum } from '../interfaces/socket.model';
 import { SocketService } from './socket.service';
-import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
     providedIn: 'root',
@@ -22,21 +21,13 @@ export class ChatService {
         this.dispathChatChunk = new Subject<string>();
         this.chatChunkStream = this.dispathChatChunk.asObservable();
 
-        this.dispathChatList = signal<IChat[]>([]);
-        this.chatList = toObservable(this.dispathChatList);
-
-        this.dispathChatSelect = signal('');
-        this.chatSelect = toObservable(this.dispathChatSelect);
-
-        this.dispatchAiEngine = signal(AiEngineEnum.deepseek);
-        this.aiEngine = toObservable(this.dispatchAiEngine);
-
-        this.dispatchIsStreaming = signal(false);
-        this.isStreaming = toObservable(this.dispatchIsStreaming);
+        this.chatList = signal<IChat[]>([]);
+        this.chatSelect = signal('');
+        this.aiEngine = signal(AiEngineEnum.openai);
+        this.isStreaming = signal(false);
 
         this.listenMessage();
     }
-
     /**
      * @description Notify service for show messages to user
      */
@@ -60,22 +51,22 @@ export class ChatService {
     /**
      * @description Signal to dispatch chat list
      */
-    private dispathChatList: WritableSignal<IChat[]>;
+    public chatList: WritableSignal<IChat[]>;
 
     /**
      * @description Signal to dispatch chat id selected
      */
-    private dispathChatSelect: WritableSignal<string>;
+    public chatSelect: WritableSignal<string>;
 
     /**
      * @description Signal to dispatch AI engine
      */
-    private dispatchAiEngine: WritableSignal<AiEngineEnum>;
+    public aiEngine: WritableSignal<AiEngineEnum>;
 
     /**
      * @description Signal to dispatch if is streaming a chat server response
      */
-    private dispatchIsStreaming: WritableSignal<boolean>;
+    public isStreaming: WritableSignal<boolean>;
 
     /**
      * @description Listen message from socket service
@@ -97,9 +88,9 @@ export class ChatService {
             }
 
             if (message.state == StateMessageWSEnum.END_STREAMING) {
-                this.dispatchIsStreaming.set(false);
+                this.isStreaming.set(false);
 
-                const chatList = this.dispathChatList();
+                const chatList = this.chatList();
                 const chatSelected = chatList.find(
                     (chatE) => chatE.id == message.conversationId
                 );
@@ -123,32 +114,12 @@ export class ChatService {
     chatChunkStream: Observable<string>;
 
     /**
-     * @description Observable to get chat list
-     */
-    chatList: Observable<IChat[]>;
-
-    /**
-     * @description Observable to get chat select
-     */
-    chatSelect: Observable<string>;
-
-    /**
-     * @description Observable to get AI engine
-     */
-    aiEngine: Observable<AiEngineEnum>;
-
-    /**
-     * @description Observable to get if is streaming
-     */
-    isStreaming: Observable<boolean>;
-
-    /**
      * @description Select a chat by chat id
      *
      * @param chatId chat id to chat to select
      */
     selectChat(chatId: string): void {
-        if (this.dispatchIsStreaming()) {
+        if (this.isStreaming()) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-list.cant-change-chat-while-streaming'
             );
@@ -156,9 +127,9 @@ export class ChatService {
             return;
         }
 
-        if (this.dispathChatSelect() == chatId) return;
+        if (this.chatSelect() == chatId) return;
 
-        const chatList = this.dispathChatList.asReadonly()();
+        const chatList = this.chatList.asReadonly()();
 
         const chatSelected = chatList.find((chat) => chat.id == chatId);
 
@@ -166,10 +137,10 @@ export class ChatService {
             return;
         }
 
-        this.dispathChatSelect.set(chatId);
+        this.chatSelect.set(chatId);
 
         if (chatSelected.history.length) {
-            this.dispatchAiEngine.set(chatSelected.aiEngine);
+            this.aiEngine.set(chatSelected.aiEngine);
         }
     }
 
@@ -179,7 +150,7 @@ export class ChatService {
      * @param engine AI engine enum selected
      */
     async setAiEngine(engine: AiEngineEnum): Promise<void> {
-        if (this.dispatchIsStreaming()) {
+        if (this.isStreaming()) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-list.cant-change-model-while-streaming'
             );
@@ -187,10 +158,10 @@ export class ChatService {
             return;
         }
 
-        const chatList = this.dispathChatList();
+        const chatList = this.chatList();
 
         const chatSelected = chatList.find(
-            (chat) => chat.id == this.dispathChatSelect()
+            (chat) => chat.id == this.chatSelect()
         );
 
         if (!chatSelected) {
@@ -207,14 +178,14 @@ export class ChatService {
 
         chatSelected.aiEngine = engine;
 
-        this.dispatchAiEngine.set(engine);
+        this.aiEngine.set(engine);
     }
 
     /**
      * @description Add a chat to chat list and select it
      */
     async addChat(): Promise<void> {
-        if (this.dispatchIsStreaming()) {
+        if (this.isStreaming()) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-list.cant-add-chat-while-streaming'
             );
@@ -222,11 +193,8 @@ export class ChatService {
             return;
         }
 
-        if (this.dispathChatList().length) {
-            if (
-                !this.dispathChatList()[this.dispathChatList().length - 1]
-                    .history.length
-            ) {
+        if (this.chatList().length) {
+            if (!this.chatList()[this.chatList().length - 1].history.length) {
                 const textTranslation = this.translateService.instant(
                     'chat.chat-list.cant-add-conversation-before-start-chat'
                 );
@@ -237,17 +205,17 @@ export class ChatService {
 
         const chatId = crypto.randomUUID();
 
-        this.dispathChatList.update((value) => {
+        this.chatList.update((value) => {
             value.push({
                 history: [],
                 id: chatId,
-                aiEngine: this.dispatchAiEngine(),
+                aiEngine: this.aiEngine(),
             });
 
             return value;
         });
 
-        this.dispathChatSelect.set(chatId);
+        this.chatSelect.set(chatId);
     }
 
     /**
@@ -257,40 +225,48 @@ export class ChatService {
      */
     async startChatWs(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
-            const chatList: IChat[] = this.dispathChatList();
+            let chatSelected: IChat | undefined;
 
-            const chatSelected = chatList.find(
-                (chatE) => chatE.id == this.dispathChatSelect()
-            );
+            this.chatList.update((chatList) => {
+                chatSelected = chatList.find(
+                    (chat) => chat.id == this.chatSelect()
+                );
+
+                if (!chatSelected) return chatList;
+
+                chatSelected.history.push(
+                    {
+                        role: IHRole.user,
+                        parts,
+                    },
+                    {
+                        role: IHRole.model,
+                        parts: [
+                            {
+                                type: TypePartEnum.text,
+                                text: '',
+                            },
+                        ],
+                    }
+                );
+
+                return chatList;
+            });
 
             if (!chatSelected) return resolve();
 
-            this.dispatchIsStreaming.set(true);
+            this.chatList.set([...this.chatList()]);
 
-            chatSelected.history.push({
-                role: IHRole.user,
-                parts,
-            });
-
-            chatSelected.history.push({
-                role: IHRole.model,
-                parts: [
-                    {
-                        type: TypePartEnum.text,
-                        text: '',
-                    },
-                ],
-            });
-
-            this.dispathChatList.set(chatList);
-
+            this.isStreaming.set(true);
             this.dispathChatChunk.next('...');
 
             this.socketService.sendMessages({
                 history: chatSelected.history.slice(0, -1),
-                aiEngine: this.dispatchAiEngine(),
+                aiEngine: this.aiEngine(),
                 conversationId: chatSelected.id,
             });
+
+            resolve();
         });
     }
 
@@ -301,40 +277,46 @@ export class ChatService {
      */
     async conversationWs(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
-            const chatList: IChat[] = this.dispathChatList();
+            let chatSelected: IChat | undefined;
 
-            const chatHistory = chatList.find(
-                (chatL) => chatL.id == this.dispathChatSelect()
-            );
+            this.chatList.update((chatList) => {
+                chatSelected = chatList.find(
+                    (chat) => chat.id == this.chatSelect()
+                );
 
-            if (!chatHistory) return resolve();
+                if (!chatSelected) return chatList;
 
-            this.dispatchIsStreaming.set(true);
-
-            chatHistory.history.push({
-                role: IHRole.user,
-                parts,
-            });
-
-            chatHistory.history.push({
-                role: IHRole.model,
-                parts: [
+                chatSelected.history.push(
                     {
-                        type: TypePartEnum.text,
-                        text: '',
+                        role: IHRole.user,
+                        parts,
                     },
-                ],
+                    {
+                        role: IHRole.model,
+                        parts: [
+                            {
+                                type: TypePartEnum.text,
+                                text: '',
+                            },
+                        ],
+                    }
+                );
+
+                return chatList;
             });
 
-            this.dispathChatList.set(chatList);
+            if (!chatSelected) return resolve();
 
+            this.isStreaming.set(true);
             this.dispathChatChunk.next('...');
 
             this.socketService.sendMessages({
-                history: chatHistory.history.slice(0, -1),
-                aiEngine: this.dispatchAiEngine(),
-                conversationId: chatHistory.id,
+                history: chatSelected.history.slice(0, -1),
+                aiEngine: this.aiEngine(),
+                conversationId: chatSelected.id,
             });
+
+            resolve();
         });
     }
 }

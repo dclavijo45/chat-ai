@@ -3,14 +3,13 @@ import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
+    computed,
     ElementRef,
     inject,
-    OnDestroy,
-    OnInit,
     Signal,
     signal,
-    ViewChild,
-    WritableSignal,
+    viewChild,
+    WritableSignal
 } from '@angular/core';
 import {
     FormControl,
@@ -18,13 +17,16 @@ import {
     ReactiveFormsModule,
     Validators,
 } from '@angular/forms';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { map } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MarkdownModule } from 'ngx-markdown';
+import { connect } from 'ngxtension/connect';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
+import { TrimValidator } from '../../../../shared/form-validators/trim.validator';
 import { NotifyService } from '../../../../shared/services/notify.service';
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
@@ -53,7 +55,7 @@ import { SocketService } from '../../services/socket.service';
     styleUrl: './chat-history.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatHistoryComponent implements OnInit, OnDestroy {
+export class ChatHistoryComponent {
     constructor() {
         this.chatService = inject(ChatService);
         this.cdr = inject(ChangeDetectorRef);
@@ -63,6 +65,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
 
         this.userInputPrompt = new FormControl<string | null>('', [
             Validators.required,
+            TrimValidator(),
         ]);
 
         this.chatHistory = signal({
@@ -70,52 +73,50 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
             id: crypto.randomUUID(),
             aiEngine: AiEngineEnum.deepseek,
         });
+        this.isServerConnected = signal(false);
+        this.isStreaming = signal(false);
+        this.imagesList = signal([]);
 
         this.chatChunkStream = toSignal(this.chatService.chatChunkStream, {
             initialValue: '',
         });
-
-        this.aiEngine = toSignal(this.chatService.aiEngine, {
-            initialValue: AiEngineEnum.deepseek,
-        });
-
-        this.isServerConnected = toSignal(
-            this.socketService.listenIsConnected,
-            {
-                initialValue: false,
-            }
+        const userInputPromptValid = toSignal(
+            this.userInputPrompt.statusChanges.pipe(
+                map(() => this.userInputPrompt.valid)
+            ),
+            { initialValue: this.userInputPrompt.valid }
         );
 
-        this.$destroy = new Subscription();
-
-        this.isStreaming = toSignal(this.chatService.isStreaming, {
-            initialValue: false,
-        });
-
-        this.imagesList = signal([]);
+        this.canSendChat = computed(
+            () =>
+                userInputPromptValid() &&
+                this.isServerConnected() &&
+                !this.isStreaming()
+        );
 
         this.TypePartEnum = TypePartEnum;
         this.IHRole = IHRole;
 
+        connect(this.isStreaming, () => this.chatService.isStreaming());
+        connect(this.isServerConnected, () => this.socketService.isConnected());
+
         afterNextRender(() => {
             this.socketService.connect();
         });
+
+        this.listenSignals();
     }
 
     /**
-     * @description Html element reference to the chat history list
+     * @description Signal to manage html element reference to the chat history list
      */
-    @ViewChild('historyList') historyList!: ElementRef<HTMLDivElement>;
+    historyListSgn: Signal<ElementRef<HTMLDivElement> | undefined> =
+        viewChild<ElementRef<HTMLDivElement>>('historyList');
 
     /**
      * @description Service to manage chat history
      */
     private chatService: ChatService;
-
-    /**
-     * @description Subscription to destroy observables
-     */
-    private $destroy: Subscription;
 
     /**
      * @description Change detector reference to update the view
@@ -136,16 +137,6 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
      * @description Service to manage the translations
      */
     private translateService: TranslateService;
-
-    /**
-     * @description Flag if is streaming a chat server response
-     */
-    isStreaming: Signal<boolean>;
-
-    /**
-     * @description Flag if the server is connected
-     */
-    isServerConnected: Signal<boolean>;
 
     /**
      * @description Chat history signal to manage the chat history
@@ -178,50 +169,31 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     IHRole: typeof IHRole;
 
     /**
-     * @description Selected chat ai engine
+     * @description Signal to check if the user can send a chat message
      */
-    aiEngine: Signal<AiEngineEnum>;
+    canSendChat: Signal<boolean>;
 
-    ngOnInit(): void {
-        this.$destroy.add(
-            this.chatService.chatSelect.subscribe(async (chatId) => {
-                const chatList = await firstValueFrom(
-                    this.chatService.chatList
-                );
-                const chatHistory = chatList.find((chat) => chat.id == chatId);
+    /**
+     * @description Flag if is streaming a chat server response
+     */
+    isStreaming: WritableSignal<boolean>;
 
-                if (chatHistory) {
-                    this.chatHistory.set(chatHistory);
-                }
+    /**
+     * @description Flag if the server is connected
+     */
+    isServerConnected: WritableSignal<boolean>;
 
-                this.scrollHistory();
-            })
-        );
-
-        this.$destroy.add(
-            this.chatService.chatList.subscribe(async (chatList) => {
-                const chatSelected = await firstValueFrom(
-                    this.chatService.chatSelect
-                );
-                const chatHistory = chatList.find(
-                    (chat) => chat.id == chatSelected
-                );
-
-                if (chatHistory) {
-                    this.chatHistory.set(chatHistory);
-                }
-
-                this.scrollHistory();
-            })
-        );
-
-        this.$destroy.add(
-            this.chatService.aiEngine.subscribe(async (aiEngine) => {
+    /**
+     * @description Listen signals for manage actions
+     */
+    private listenSignals(): void {
+        explicitEffect(
+            [this.chatService.aiEngine],
+            ([aiEngine]) => {
                 if (
-                    [
-                        AiEngineEnum.deepseek,
-                        AiEngineEnum.perplexity
-                    ].includes(aiEngine)
+                    [AiEngineEnum.deepseek, AiEngineEnum.perplexity].includes(
+                        aiEngine
+                    )
                 ) {
                     if (this.imagesList().length) {
                         const textTranslation = this.translateService.instant(
@@ -233,18 +205,49 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
                         this.imagesList.set([]);
                     }
                 }
-            })
+            },
+            { defer: true }
         );
 
-        this.$destroy.add(
-            this.chatService.chatChunkStream.subscribe(() => {
+        explicitEffect(
+            [this.chatService.chatList],
+            ([chatList]) => {
+                const chatSelected = this.chatService.chatSelect();
+                const chatHistory = chatList.find(
+                    (chat) => chat.id == chatSelected
+                );
+
+                if (chatHistory) {
+                    this.chatHistory.set(chatHistory);
+                }
+            },
+            { defer: true }
+        );
+
+        explicitEffect(
+            [this.chatService.chatSelect],
+            ([chatSelect]) => {
+                const chatList = this.chatService.chatList();
+                const chatHistory = chatList.find(
+                    (chat) => chat.id == chatSelect
+                );
+
+                if (chatHistory) {
+                    this.chatHistory.set(chatHistory);
+                }
+
+                setTimeout(() => {
+                    this.scrollHistory(true);
+                }, 100);
+            },
+            { defer: true }
+        );
+
+        this.chatService.chatChunkStream
+            .pipe(takeUntilDestroyed())
+            .subscribe(() => {
                 this.scrollHistory();
-            })
-        );
-    }
-
-    ngOnDestroy(): void {
-        this.$destroy ? this.$destroy.unsubscribe() : false;
+            });
     }
 
     /**
@@ -255,13 +258,7 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
     async sendMessage(e: Event): Promise<void> {
         e.preventDefault();
 
-        if (!this.isServerConnected()) return;
-
-        if (this.isStreaming()) return;
-
-        if (this.userInputPrompt.invalid) return;
-
-        if (!this.userInputPrompt.value?.trim()) return;
+        if (!this.canSendChat()) return;
 
         const userPrompt: string = JSON.parse(
             JSON.stringify(this.userInputPrompt.value)
@@ -294,16 +291,39 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
         } else {
             await this.chatService.startChatWs(parts);
         }
+
+        setTimeout(() => {
+            this.scrollHistory(true);
+        }, 100);
     }
 
     /**
      * @description Scroll to the bottom of the chat history list
+     * @param inmediatly Flag to scroll inmediatly to the bottom
      */
-    scrollHistory(): void {
-        setTimeout(() => {
-            this.historyList.nativeElement.scrollTop =
-                this.historyList.nativeElement.scrollHeight;
-        }, 100);
+    scrollHistory(inmediatly: boolean = false): void {
+        const historyListElement = this.historyListSgn()?.nativeElement;
+
+        if (!historyListElement) return;
+
+        if (inmediatly) {
+            historyListElement.scrollTo({
+                top: historyListElement.scrollHeight,
+                behavior: 'smooth',
+            });
+            return;
+        }
+
+        const isAtBottom =
+            historyListElement.scrollTop + historyListElement.clientHeight >=
+            historyListElement.scrollHeight * 0.9;
+
+        if (isAtBottom) {
+            historyListElement.scrollTo({
+                top: historyListElement.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
     }
 
     /**
@@ -313,10 +333,9 @@ export class ChatHistoryComponent implements OnInit, OnDestroy {
      */
     loadImages(inputFile: HTMLInputElement): void {
         if (
-            [
-                AiEngineEnum.deepseek,
-                AiEngineEnum.perplexity
-            ].includes(this.aiEngine())
+            [AiEngineEnum.deepseek, AiEngineEnum.perplexity].includes(
+                this.chatService.aiEngine()
+            )
         ) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-history.current-model-not-support-img'

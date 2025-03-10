@@ -2,23 +2,24 @@ import {
     ChangeDetectionStrategy,
     Component,
     OnInit,
-    Signal,
+    WritableSignal,
     inject,
+    signal
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
+import { connect } from 'ngxtension/connect';
 import { Observable } from 'rxjs';
+import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
+import { I18nLanguage } from '../../../../shared/interfaces/i18n.model';
 import { ThemeColorService } from '../../../../shared/services/theme-color.service';
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
-import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { I18nLanguage } from '../../../../shared/interfaces/i18n.model';
-import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 
 @Component({
     selector: 'chat-list',
@@ -38,17 +39,13 @@ export class ChatListComponent implements OnInit {
         this.themeColorService = inject(ThemeColorService);
         this.translateService = inject(TranslateService);
 
-        this.chatList = toSignal(this.chatService.chatList, {
-            initialValue: [],
-        });
+        this.chatList = signal<IChat[]>([]);
+        this.aiEngine = signal(AiEngineEnum.deepseek);
+        this.chatSelected = signal<string>('');
 
-        this.chatSelected = toSignal(this.chatService.chatSelect, {
-            initialValue: '',
-        });
-
-        this.aiEngine = toSignal(this.chatService.aiEngine, {
-            initialValue: AiEngineEnum.deepseek,
-        });
+        connect(this.chatList, () => this.chatService.chatList());
+        connect(this.chatSelected, () => this.chatService.chatSelect());
+        connect(this.aiEngine, () => this.chatService.aiEngine());
 
         this.AiEngineEnum = AiEngineEnum;
     }
@@ -71,17 +68,17 @@ export class ChatListComponent implements OnInit {
     /**
      * @description List of chat data
      */
-    chatList: Signal<IChat[]>;
+    chatList: WritableSignal<IChat[]>;
 
     /**
      * @description Selected chat id
      */
-    chatSelected: Signal<string>;
+    chatSelected: WritableSignal<string>;
 
     /**
      * @description Selected chat ai engine
      */
-    aiEngine: Signal<AiEngineEnum>;
+    aiEngine: WritableSignal<AiEngineEnum>;
 
     /**
      * @description Enum for ai engine

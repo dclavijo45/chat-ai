@@ -1,5 +1,4 @@
 import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -17,10 +16,9 @@ export class SocketService {
         this.socket = inject(Socket);
 
         this.dispatchMessage = new Subject<IMessageWSResponse>();
-        this.dispatchIsConnected = signal<boolean>(false);
+        this.isConnected = signal<boolean>(false);
 
         this.listenMessage = this.dispatchMessage.asObservable();
-        this.listenIsConnected = toObservable(this.dispatchIsConnected);
 
         this.timerPing = 0;
     }
@@ -34,11 +32,6 @@ export class SocketService {
      * @description Signal for dispatching message
      */
     private dispatchMessage: Subject<IMessageWSResponse>;
-
-    /**
-     * @description Signal for dispatching connection status
-     */
-    private dispatchIsConnected: WritableSignal<boolean>;
 
     /**
      * @description Timer for ping socket server
@@ -56,12 +49,12 @@ export class SocketService {
             });
 
         this.socket.fromEvent('connect').subscribe(() => {
-            this.dispatchIsConnected.update(() => true);
+            this.isConnected.update(() => true);
             this.triggerPing();
         });
 
         this.socket.fromEvent('disconnect').subscribe(() => {
-            this.dispatchIsConnected.update(() => false);
+            this.isConnected.update(() => false);
 
             clearInterval(this.timerPing);
             this.timerPing = 0;
@@ -98,14 +91,14 @@ export class SocketService {
     }
 
     /**
-     * @description Listen to the message from the socket server
+     * @description Signal for dispatching connection status
      */
-    listenMessage: Observable<IMessageWSResponse>;
+    public isConnected: WritableSignal<boolean>;
 
     /**
-     * @description Listen to the connection status
+     * @description Listen to the message from the socket server
      */
-    listenIsConnected: Observable<boolean>;
+    public listenMessage: Observable<IMessageWSResponse>;
 
     /**
      * @description Connect to the socket server
