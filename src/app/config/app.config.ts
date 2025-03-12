@@ -19,6 +19,7 @@ import { MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { markdownRendererFactory } from '../shared/factories/markdown-renderer.factory';
 import { providers } from './app.providers';
 import { routes } from './app.routes';
+import { popperVariation, provideTippyConfig, provideTippyLoader, tooltipVariation } from '@ngneat/helipopper/config';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -33,5 +34,13 @@ export const appConfig: ApplicationConfig = {
                 useFactory: markdownRendererFactory
             },
         }),
+        provideTippyLoader(() => import('tippy.js')),
+        provideTippyConfig({
+            defaultVariation: 'tooltip',
+            variations: {
+              tooltip: tooltipVariation,
+              popper: popperVariation,
+            },
+          }),
     ],
 };

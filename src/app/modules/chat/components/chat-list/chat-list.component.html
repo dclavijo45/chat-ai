@@ -1,33 +1,60 @@
 <main themeColor>
     <div class="new-chat" themeColor>
         <div class="ai-logos">
-            @for (aiEngineE of aiEngineList; track $index) {
-                <img class="logo" [class.active]="aiEngine() == aiEngineE"
-                    src="/assets/img/{{aiEngineE}}-logo.png" alt="Logo {{aiEngineE}}"
-                    width="24" height="24" [title]="aiEngineE" (click)="setEngine(aiEngineE)"
-                    themeColor>
-            }
+            <img *ngFor="let aiEngineE of aiEngineList" class="logo" [class.active]="aiEngine() == aiEngineE"
+                src="/assets/img/{{aiEngineE}}-logo.png" alt="Logo {{aiEngineE}}"
+                width="24" height="24" [title]="aiEngineE" (click)="setEngine(aiEngineE)"
+                themeColor>
         </div>
 
-        <span class="text-new" (click)="addChat()" themeColor>{{ 'chat.chat-list.new-chat' | translate }} <i
-                class="material-icons-outlined add-icon" themeColor>add</i></span>
+        <div class="chat-options">
+            <span class="chat-option" (click)="addChat()" themeColor>
+                {{ 'chat.chat-list.new-chat' | translate }}
+                <i class="material-icons-outlined icon" themeColor>add</i>
+            </span>
+
+            <span class="chat-option" [class.disabled]="canCleanChatList"
+                (click)="cleanChatList()" themeColor>
+                {{ 'chat.chat-list.clean-chats' | translate }}
+            </span>
+        </div>
     </div>
 
     <div class="chat-list scroll-1">
-        <span class="chat-list-title" themeColor>Chats</span>
+        <span *ngIf="chatList().length" class="chat-list-title" themeColor>Chats</span>
 
-        <div *ngFor="let chat of chatList(); index as i" class="chat-element" [class.active]="chatSelected() == chat.id"
-            (click)="selectChat(chat.id)" themeColor>
-            {{ 'chat.chat-list.conversation' | translate }} #{{ i + 1 }}
-        </div>
+        @for (chat of chatList(); track $index) {
+            <div class="chat-element"
+                [class.active]="chatSelected() == chat.id" (click)="selectChat(chat.id)"
+                themeColor>
+                <span>
+                    {{ 'chat.chat-list.conversation' | translate }} #{{ $index + 1 }}
+                </span>
+
+                <i class="material-icons-outlined delete-btn"
+                    [tp]="'chat.chat-list.delete-chat' | translate" [tpIsLazy]="true"
+                    (click)="removeChat($event, chat)" themeColor>
+                    delete
+                </i>
+            </div>
+        }
     </div>
 
     <footer>
-        <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()" themeColor>
+        <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()"
+            [tp]="'chat.chat-list.toggle-theme' | translate" [tpIsLazy]="true" themeColor>
             {{ themeColor() == 'light' ? 'dark_mode' : 'light_mode' }}
         </i>
 
-        <i class="material-icons-outlined" #ngxContextMenu="ngxContextMenu" [contextMenu]="oneContextMenu"
+        <i class="material-icons-outlined"
+            [tp]="(allowStoreChats ? 'chat.chat-list.dont-store-chats'
+                : 'chat.chat-list.store-chats') | translate"
+            (click)="toggleStoreChatsPermission()" [tpIsLazy]="true" themeColor>
+            {{ allowStoreChats ? 'work' : 'work_outline' }}
+        </i>
+
+        <i class="material-icons-outlined" [tp]="'chat.chat-list.change-language' | translate"
+            [tpIsLazy]="true" #ngxContextMenu="ngxContextMenu" [contextMenu]="oneContextMenu"
             (click)="ngxContextMenu?.open($event)" themeColor>
             translate
         </i>
@@ -35,7 +62,8 @@
 </main>
 
 <context-menu #oneContextMenu>
-    <ng-template contextMenuItem *ngFor="let language of languages" [disabled]="language.code == currentLanguage"
-        (execute)="changeLanguage(language)">{{
-        language.name }}</ng-template>
+    <ng-template contextMenuItem *ngFor="let language of languages"
+        [disabled]="language.code == currentLanguage"(execute)="changeLanguage(language)">
+        {{ language.name }}
+    </ng-template>
 </context-menu>

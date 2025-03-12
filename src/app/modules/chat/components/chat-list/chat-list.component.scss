@@ -14,11 +14,12 @@ main.dark {
     display: grid;
     grid-template-rows: 2fr;
     grid-template-columns: 1fr;
-    height: 110px;
+    height: 120px;
     align-items: center;
     padding: 0.2rem 0.5rem;
     background-color: transparent;
     border-radius: 0.5rem;
+    gap: 0.7rem;
     transition: background-color 100ms ease-in-out;
 }
 
@@ -56,8 +57,15 @@ main.dark {
     border: dashed 1px #ececec;
 }
 
-.text-new {
-    justify-self: start;
+.chat-options {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    justify-items: center;
+}
+
+.chat-option {
     width: max-content;
     font-size: 14px;
     padding: 0.3rem;
@@ -65,27 +73,32 @@ main.dark {
     transition: background-color 100ms ease-in-out;
 }
 
-.text-new.dark {
+.chat-option.dark {
     color: var(--color-2);
 }
 
-.text-new:hover {
+.chat-option:hover {
     cursor: pointer;
     background-color: #ececec;
 }
 
-.text-new.dark:hover {
+.chat-option.dark:hover {
     background-color: #2f2f2f;
 }
 
-.add-icon {
+.chat-option .icon {
     justify-self: end;
     width: max-content;
     font-size: 20px;
 }
 
-.add-icon.dark {
+.chat-option .icon.dark {
     color: var(--color-2);
+}
+
+.chat-option.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .chat-list {
@@ -107,6 +120,9 @@ main.dark {
 }
 
 .chat-element {
+    display: grid;
+    grid-template-columns: 1fr 40px;
+    align-items: center;
     padding-block: 0.6rem;
     padding-left: 0.4rem;
     margin-bottom: 0.2rem;
@@ -116,6 +132,24 @@ main.dark {
     border-radius: 0.5rem;
     transition: background-color 100ms ease-in-out;
     transition: color 100ms ease-in-out;
+}
+
+.chat-element .delete-btn {
+    justify-self: end;
+    margin-right: 0.5rem;
+    color: rgb(211, 65, 65);
+}
+
+.chat-element .delete-btn:hover {
+    color: rgb(255, 0, 0);
+}
+
+.chat-element .delete-btn.dark {
+    color: rgb(157, 43, 43);
+}
+
+.chat-element .delete-btn.dark:hover {
+    color: rgb(206, 33, 33);
 }
 
 .chat-element.dark {
@@ -146,8 +180,8 @@ main.dark {
 
 footer {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    justify-items: stretch;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
     align-items: center;
 }
 

@@ -3,11 +3,18 @@
         "chat-list": {
             "new-chat": "New chat",
             "conversation": "Conversation",
+            "clean-chats": "Clean chats",
+            "delete-chat": "Delete",
+            "toggle-theme": "Toggle theme",
+            "dont-store-chats": "Don't store chats",
+            "store-chats": "Store chats",
+            "change-language": "Change language",
             "cant-change-chat-while-streaming": "You can't change chat while waiting for a response",
             "cant-change-model-while-streaming": "You can't change model while waiting for a response",
             "cant-change-model-started-chat": "You can't change ai model in a conversation already started",
             "cant-add-chat-while-streaming": "You can't add a chat while waiting for a response",
-            "cant-add-conversation-before-start-chat": "You can't add a chat until the current chat has started"
+            "cant-add-conversation-before-start-chat": "You can't add a chat until the current chat has started",
+            "cant-remove-chat-while-streaming": "You can't remove the chat while waiting for a response"
         },
         "chat-history": {
             "user-photo": "User photo",

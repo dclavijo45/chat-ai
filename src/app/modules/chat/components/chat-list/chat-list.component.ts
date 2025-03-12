@@ -1,13 +1,14 @@
 import {
     ChangeDetectionStrategy,
     Component,
-    OnInit,
     WritableSignal,
+    afterNextRender,
     inject,
-    signal
+    signal,
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+import { TippyDirective } from '@ngneat/helipopper';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
 import { connect } from 'ngxtension/connect';
@@ -19,6 +20,7 @@ import { ThemeColorService } from '../../../../shared/services/theme-color.servi
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
+import { NotifyService } from '../../../../shared/services/notify.service';
 
 @Component({
     selector: 'chat-list',
@@ -27,16 +29,18 @@ import { ChatService } from '../../services/chat.service';
         ThemeColorDirective,
         ContextMenuModule,
         TranslateModule,
+        TippyDirective,
     ],
     templateUrl: `./chat-list.component.html`,
     styleUrl: './chat-list.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatListComponent implements OnInit {
+export class ChatListComponent {
     constructor() {
         this.chatService = inject(ChatService);
         this.themeColorService = inject(ThemeColorService);
         this.translateService = inject(TranslateService);
+        this.notifyService = inject(NotifyService);
 
         this.chatList = signal<IChat[]>([]);
         this.aiEngine = signal(AiEngineEnum.deepseek);
@@ -48,6 +52,10 @@ export class ChatListComponent implements OnInit {
 
         this.AiEngineEnum = AiEngineEnum;
         this.aiEngineList = Object.values(AiEngineEnum);
+
+        afterNextRender(() => {
+            this.chatService.loadStoredChats();
+        });
     }
 
     /**
@@ -59,6 +67,11 @@ export class ChatListComponent implements OnInit {
      * @description Translate service for the app
      */
     private translateService: TranslateService;
+
+    /**
+     * @description Service for managing notifications
+     */
+    private notifyService: NotifyService;
 
     /**
      * @description Service for managing theme color design
@@ -111,8 +124,18 @@ export class ChatListComponent implements OnInit {
         return this.translateService.currentLang;
     }
 
-    ngOnInit(): void {
-        this.addChat();
+    /**
+     * @description Flag if the chat list can be cleaned
+     */
+    get canCleanChatList(): boolean {
+        return !this.chatList().length || this.chatService.isStreaming();
+    }
+
+    /**
+     * @description Flag if can store chats
+     */
+    get allowStoreChats(): boolean {
+        return this.chatService.allowStoreChats();
     }
 
     /**
@@ -125,10 +148,43 @@ export class ChatListComponent implements OnInit {
     }
 
     /**
+     * @description Remove chat from chat list
+     * @param e event parent element for prevent click
+     * @param chat chat to remove
+     */
+    removeChat(e: Event, chat: IChat): void {
+        e.stopPropagation();
+
+        this.chatService.removeChat(chat);
+    }
+
+    /**
      * @description Add new chat to chat list
      */
     addChat(): void {
+        if (!this.chatList().length || !this.chatSelected()) {
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-add-conversation-before-start-chat'
+            );
+            this.notifyService.error(textTranslation);
+            return;
+        }
+
         this.chatService.addChat();
+    }
+
+    /**
+     * @description Clean chat list
+     */
+    cleanChatList(): void {
+        this.chatService.cleanChatList();
+    }
+
+    /**
+     * @description Toggle store chats permission
+     */
+    toggleStoreChatsPermission(): void {
+        this.chatService.toggleStoreChatsPermission();
     }
 
     /**

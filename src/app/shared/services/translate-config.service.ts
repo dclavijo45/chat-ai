@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { CookieService } from 'ngx-cookie-service';
-import { i18nConstant } from '../../../shared/constants/i18n.constant';
+import { i18nConstant } from '../constants/i18n.constant';
 
 @Injectable({
     providedIn: 'root',

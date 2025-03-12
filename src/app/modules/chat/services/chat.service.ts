@@ -1,4 +1,10 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import {
+    afterNextRender,
+    inject,
+    Injectable,
+    signal,
+    WritableSignal
+} from '@angular/core';
 import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -22,8 +28,14 @@ export class ChatService {
         this.chatSelect = signal('');
         this.aiEngine = signal(AiEngineEnum.grok);
         this.isStreaming = signal(false);
+        this.allowStoreChats = signal(false);
 
         this.listenMessage();
+
+        afterNextRender(() => {
+            this.loadStoredChats();
+            this.getPermissionStoreChats();
+        });
     }
     /**
      * @description Notify service for show messages to user
@@ -61,6 +73,16 @@ export class ChatService {
     public isStreaming: WritableSignal<boolean>;
 
     /**
+     * @description Signal to get chat chunk
+     */
+    public chatChunkStream: WritableSignal<string>;
+
+    /**
+     * @description Signal to get permission to store chats from local storage
+     */
+    public allowStoreChats: WritableSignal<boolean>;
+
+    /**
      * @description Listen message from socket service
      */
     private listenMessage(): void {
@@ -90,14 +112,93 @@ export class ChatService {
                 );
 
                 this.chatChunkStream.set('');
+                this.saveChatsStorage();
             }
         });
     }
 
     /**
-     * @description Signal to get chat chunk
+     * @description Save chats to local storage
      */
-    chatChunkStream: WritableSignal<string>;
+    private saveChatsStorage(): void {
+        if (!this.allowStoreChats()) return;
+
+        localStorage.setItem('chatList', JSON.stringify(this.chatList()));
+    }
+
+    /**
+     * @description Check permission to store chats from local storage
+     */
+    private getPermissionStoreChats(): void {
+        const allowStoreChats = localStorage.getItem('allowStoreChats');
+
+        this.allowStoreChats.set(allowStoreChats == '1');
+    }
+
+    /**
+     * @description Load stored chats from local storage
+     *  (Called from component for change detection)
+     */
+    loadStoredChats(): void {
+        const chatList = localStorage.getItem('chatList');
+
+        if (chatList) {
+            this.chatList.set(JSON.parse(chatList));
+        }
+    }
+
+    /**
+     * @description Clean chat list and chat select from memory and local storage
+     */
+    cleanChatList(): void {
+        if (!this.chatList().length || this.isStreaming()) return;
+
+        this.chatList.set([]);
+        this.chatSelect.set('');
+
+        localStorage.removeItem('chatList');
+    }
+
+    /**
+     * @description Toggle permission to store chats
+     */
+    toggleStoreChatsPermission(): void {
+        const allowStoreChats = this.allowStoreChats();
+
+        localStorage.setItem('allowStoreChats', Number(!allowStoreChats).toString());
+
+        this.allowStoreChats.set(!allowStoreChats);
+    }
+
+    /**
+     * @description Remove chat from chat list
+     * @param chat Chat to remove
+     */
+    removeChat(chat: IChat): void {
+        if (this.isStreaming() && this.chatSelect() == chat.id) {
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.cant-remove-chat-while-streaming'
+            );
+            this.notifyService.warning(textTranslation);
+            return;
+        }
+
+        this.chatList.update((value) => {
+            const index = value.findIndex((chatE) => chatE.id == chat.id);
+
+            if (index == -1) return value;
+
+            value.splice(index, 1);
+
+            return value;
+        });
+
+        if (this.chatSelect() == chat.id) {
+            this.chatSelect.set('');
+        }
+
+        this.saveChatsStorage();
+    }
 
     /**
      * @description Select a chat by chat id
@@ -135,12 +236,17 @@ export class ChatService {
      *
      * @param engine AI engine enum selected
      */
-    async setAiEngine(engine: AiEngineEnum): Promise<void> {
+    setAiEngine(engine: AiEngineEnum): void {
         if (this.isStreaming()) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-list.cant-change-model-while-streaming'
             );
             this.notifyService.warning(textTranslation);
+            return;
+        }
+
+        if (!this.chatSelect()) {
+            this.aiEngine.set(engine);
             return;
         }
 
@@ -170,7 +276,7 @@ export class ChatService {
     /**
      * @description Add a chat to chat list and select it
      */
-    async addChat(): Promise<void> {
+    addChat(): void {
         if (this.isStreaming()) {
             const textTranslation = this.translateService.instant(
                 'chat.chat-list.cant-add-chat-while-streaming'
@@ -209,49 +315,49 @@ export class ChatService {
      *
      * @param parts user messages to send to AI
      */
-    async startChatWs(parts: PartHistory[]): Promise<void> {
-        return new Promise<void>(async (resolve) => {
-            let chatSelected: IChat | undefined;
+    startChatWs(parts: PartHistory[]): void {
+        let chatSelected: IChat | undefined;
 
-            this.chatList.update((chatList) => {
-                chatSelected = chatList.find(
-                    (chat) => chat.id == this.chatSelect()
-                );
+        if (!this.chatSelect()) {
+            this.addChat();
+        }
 
-                if (!chatSelected) return chatList;
+        this.chatList.update((chatList) => {
+            chatSelected = chatList.find(
+                (chat) => chat.id == this.chatSelect()
+            );
 
-                chatSelected.history.push(
-                    {
-                        role: IHRole.user,
-                        parts,
-                    },
-                    {
-                        role: IHRole.model,
-                        parts: [
-                            {
-                                type: TypePartEnum.text,
-                                text: '',
-                            },
-                        ],
-                    }
-                );
+            if (!chatSelected) return chatList;
 
-                return chatList;
-            });
+            chatSelected.history.push(
+                {
+                    role: IHRole.user,
+                    parts,
+                },
+                {
+                    role: IHRole.model,
+                    parts: [
+                        {
+                            type: TypePartEnum.text,
+                            text: '',
+                        },
+                    ],
+                }
+            );
 
-            if (!chatSelected) return resolve();
+            return chatList;
+        });
 
-            this.chatList.set([...this.chatList()]);
+        if (!chatSelected) return;
 
-            this.isStreaming.set(true);
+        this.chatList.set([...this.chatList()]);
 
-            this.socketService.sendMessages({
-                history: chatSelected.history.slice(0, -1),
-                aiEngine: this.aiEngine(),
-                conversationId: chatSelected.id,
-            });
+        this.isStreaming.set(true);
 
-            resolve();
+        this.socketService.sendMessages({
+            history: chatSelected.history.slice(0, -1),
+            aiEngine: this.aiEngine(),
+            conversationId: chatSelected.id,
         });
     }
 

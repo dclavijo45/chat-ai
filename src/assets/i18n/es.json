@@ -3,11 +3,18 @@
         "chat-list": {
             "new-chat": "Nuevo chat",
             "conversation": "Conversación",
+            "clean-chats": "Limpiar chats",
+            "delete-chat": "Eliminar",
+            "toggle-theme": "Alternar tema",
+            "dont-store-chats": "No almacenar chats",
+            "store-chats": "Almacenar chats",
+            "change-language": "Cambiar idioma",
             "cant-change-chat-while-streaming": "No puedes cambiar de chat mientras está en espera de respuesta",
             "cant-change-model-while-streaming": "No puedes cambiar de modelo mientras está en espera de respuesta",
             "cant-change-model-started-chat": "No puedes cambiar de modelo ai en una conversación ya comenzada",
             "cant-add-chat-while-streaming": "No puedes agregar un chat mientras está en espera de respuesta",
-            "cant-add-conversation-before-start-chat": "No puedes agregar un chat hasta que el chat actual haya comenzado"
+            "cant-add-conversation-before-start-chat": "No puedes agregar un chat hasta que el chat actual haya comenzado",
+            "cant-remove-chat-while-streaming": "No puedes eliminar el chat mientras está en espera de respuesta"
         },
         "chat-history": {
             "user-photo": "Foto de usuario",

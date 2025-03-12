@@ -77,7 +77,7 @@ export class ChatHistoryComponent {
         this.isStreaming = signal(false);
         this.imagesList = signal([]);
         this.chatChunkStream = signal('');
-        
+
         const userInputPromptValid = toSignal(
             this.userInputPrompt.statusChanges.pipe(
                 map(() => this.userInputPrompt.valid)
@@ -107,12 +107,6 @@ export class ChatHistoryComponent {
     }
 
     /**
-     * @description html element reference to the chat history list
-     */
-    historyList: Signal<ElementRef<HTMLDivElement> | undefined> =
-        viewChild<ElementRef<HTMLDivElement>>('historyList');
-
-    /**
      * @description Service to manage chat history
      */
     private chatService: ChatService;
@@ -136,6 +130,12 @@ export class ChatHistoryComponent {
      * @description Service to manage the translations
      */
     private translateService: TranslateService;
+
+    /**
+     * @description html element reference to the chat history list
+     */
+    historyList: Signal<ElementRef<HTMLDivElement> | undefined> =
+        viewChild<ElementRef<HTMLDivElement>>('historyList');
 
     /**
      * @description Chat history signal to manage the chat history
@@ -226,6 +226,15 @@ export class ChatHistoryComponent {
         explicitEffect(
             [this.chatService.chatSelect],
             ([chatSelect]) => {
+                if (!chatSelect) {
+                    this.chatHistory.set({
+                        history: [],
+                        id: crypto.randomUUID(),
+                        aiEngine: this.chatService.aiEngine(),
+                    });
+                    return;
+                }
+
                 const chatList = this.chatService.chatList();
                 const chatHistory = chatList.find(
                     (chat) => chat.id == chatSelect
@@ -256,7 +265,7 @@ export class ChatHistoryComponent {
      *
      * @param e Event to prevent default enter space
      */
-    async sendMessage(e: Event): Promise<void> {
+    sendMessage(e: Event): void {
         e.preventDefault();
 
         if (!this.canSendChat()) return;
@@ -288,9 +297,9 @@ export class ChatHistoryComponent {
         this.imagesList.set([]);
 
         if (this.chatHistory().history.length) {
-            await this.chatService.conversationWs(parts);
+            this.chatService.conversationWs(parts);
         } else {
-            await this.chatService.startChatWs(parts);
+            this.chatService.startChatWs(parts);
         }
 
         setTimeout(() => {
