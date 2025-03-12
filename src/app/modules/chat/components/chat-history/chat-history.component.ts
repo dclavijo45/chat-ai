@@ -20,7 +20,7 @@ import {
 import { map } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MarkdownModule } from 'ngx-markdown';
 import { connect } from 'ngxtension/connect';
@@ -76,10 +76,8 @@ export class ChatHistoryComponent {
         this.isServerConnected = signal(false);
         this.isStreaming = signal(false);
         this.imagesList = signal([]);
-
-        this.chatChunkStream = toSignal(this.chatService.chatChunkStream, {
-            initialValue: '',
-        });
+        this.chatChunkStream = signal('');
+        
         const userInputPromptValid = toSignal(
             this.userInputPrompt.statusChanges.pipe(
                 map(() => this.userInputPrompt.valid)
@@ -99,6 +97,7 @@ export class ChatHistoryComponent {
 
         connect(this.isStreaming, () => this.chatService.isStreaming());
         connect(this.isServerConnected, () => this.socketService.isConnected());
+        connect(this.chatChunkStream, () => this.chatService.chatChunkStream());
 
         afterNextRender(() => {
             this.socketService.connect();
@@ -146,7 +145,7 @@ export class ChatHistoryComponent {
     /**
      * @description Chat chunk stream signal to manage the chat chunk stream
      */
-    chatChunkStream: Signal<string>;
+    chatChunkStream: WritableSignal<string>;
 
     /**
      * @description User input prompt form control
@@ -243,11 +242,13 @@ export class ChatHistoryComponent {
             { defer: true }
         );
 
-        this.chatService.chatChunkStream
-            .pipe(takeUntilDestroyed())
-            .subscribe(() => {
+        explicitEffect(
+            [this.chatService.chatChunkStream],
+            ([chunk]) => {
                 this.scrollHistory();
-            });
+            },
+            { defer: true }
+        );
     }
 
     /**
@@ -306,19 +307,11 @@ export class ChatHistoryComponent {
 
         if (!historyListElement) return;
 
-        if (inmediatly) {
-            historyListElement.scrollTo({
-                top: historyListElement.scrollHeight,
-                behavior: 'smooth',
-            });
-            return;
-        }
-
         const isAtBottom =
             historyListElement.scrollTop + historyListElement.clientHeight >=
             historyListElement.scrollHeight * 0.9;
 
-        if (isAtBottom) {
+        if (inmediatly || isAtBottom) {
             historyListElement.scrollTo({
                 top: historyListElement.scrollHeight,
                 behavior: 'smooth',

@@ -11,7 +11,6 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
 import { connect } from 'ngxtension/connect';
-import { Observable } from 'rxjs';
 import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
@@ -48,6 +47,7 @@ export class ChatListComponent implements OnInit {
         connect(this.aiEngine, () => this.chatService.aiEngine());
 
         this.AiEngineEnum = AiEngineEnum;
+        this.aiEngineList = Object.values(AiEngineEnum);
     }
 
     /**
@@ -86,9 +86,14 @@ export class ChatListComponent implements OnInit {
     AiEngineEnum: typeof AiEngineEnum;
 
     /**
+     * @description List of available ai engines
+     */
+    aiEngineList: AiEngineEnum[];
+
+    /**
      * @description Getter for theme color
      */
-    get themeColor(): Observable<ThemeColorEnum> {
+    get themeColor(): WritableSignal<ThemeColorEnum> {
         return this.themeColorService.themeColor;
     }
 

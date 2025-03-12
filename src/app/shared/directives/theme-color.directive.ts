@@ -1,26 +1,24 @@
 import {
     Directive,
     ElementRef,
-    OnDestroy,
-    OnInit,
     Renderer2,
-    inject,
+    inject
 } from '@angular/core';
-import { ThemeColorService } from '../services/theme-color.service';
-import { Subscription } from 'rxjs';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ThemeColorEnum } from '../enums/theme-color.enum';
+import { ThemeColorService } from '../services/theme-color.service';
 
 @Directive({
     selector: '[themeColor]',
     standalone: true,
 })
-export class ThemeColorDirective implements OnInit, OnDestroy {
+export class ThemeColorDirective {
     constructor() {
         this.themeColorService = inject(ThemeColorService);
         this.elementRef = inject(ElementRef);
         this.renderer2 = inject(Renderer2);
 
-        this.destroy$ = new Subscription();
+        this.listenThemeColor();
     }
 
     /**
@@ -38,29 +36,15 @@ export class ThemeColorDirective implements OnInit, OnDestroy {
      */
     private renderer2: Renderer2;
 
-    /**
-     * @description Subscription for unsubscribing the observable
-     */
-    private destroy$: Subscription;
-
-    ngOnInit(): void {
-        const $ = this.themeColorService.themeColor
-            .subscribe((themeColor) => {
-                if (themeColor == ThemeColorEnum.dark) {
-                    this.renderer2.addClass(this.elementRef.nativeElement, ThemeColorEnum.dark);
-                    this.renderer2.removeClass(this.elementRef.nativeElement, ThemeColorEnum.light);
-                }
-
-                if (themeColor == ThemeColorEnum.light) {
-                    this.renderer2.addClass(this.elementRef.nativeElement, ThemeColorEnum.light);
-                    this.renderer2.removeClass(this.elementRef.nativeElement, ThemeColorEnum.dark);
-                }
-            });
-
-        this.destroy$.add($);
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$ ? this.destroy$.unsubscribe() : false;
+    private listenThemeColor(): void {
+        explicitEffect([this.themeColorService.themeColor], ([themeColor]) => {
+            this.renderer2.addClass(this.elementRef.nativeElement, themeColor);
+            this.renderer2.removeClass(
+                this.elementRef.nativeElement,
+                themeColor === ThemeColorEnum.dark
+                    ? ThemeColorEnum.light
+                    : ThemeColorEnum.dark
+            );
+        });
     }
 }

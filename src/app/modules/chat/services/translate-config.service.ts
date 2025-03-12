@@ -12,10 +12,13 @@ export class TranslateConfigService {
         this.translateService = inject(TranslateService);
     }
 
+    /**
+     * @description Service to manage cookies
+     */
     private cookieService: CookieService;
 
     /**
-     * @description Translate service for the app
+     * @description Service to manage translations
      */
     private translateService: TranslateService;
 

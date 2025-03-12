@@ -1,5 +1,4 @@
 import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
 import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
 import { TranslateService } from '@ngx-translate/core';
@@ -18,9 +17,7 @@ export class ChatService {
         this.socketService = inject(SocketService);
         this.translateService = inject(TranslateService);
 
-        this.dispathChatChunk = new Subject<string>();
-        this.chatChunkStream = this.dispathChatChunk.asObservable();
-
+        this.chatChunkStream = signal('');
         this.chatList = signal<IChat[]>([]);
         this.chatSelect = signal('');
         this.aiEngine = signal(AiEngineEnum.grok);
@@ -42,11 +39,6 @@ export class ChatService {
      * @description Translate service for translate messages
      */
     private translateService: TranslateService;
-
-    /**
-     * @description Subject to dispatch chat chunk
-     */
-    private dispathChatChunk: Subject<string>;
 
     /**
      * @description Signal to dispatch chat list
@@ -72,16 +64,10 @@ export class ChatService {
      * @description Listen message from socket service
      */
     private listenMessage(): void {
-        // store chunk message temporary
-        let tempChunk = '';
-
         this.socketService.listenMessage.subscribe((message) => {
-            if (message.state == StateMessageWSEnum.START) {
-                return;
-            }
-
-            tempChunk += message.messageChunk;
-            this.dispathChatChunk.next(tempChunk);
+            this.chatChunkStream.update(
+                (chunk) => chunk + message.messageChunk
+            );
 
             if (message.state == StateMessageWSEnum.STREAMING) {
                 return;
@@ -99,19 +85,19 @@ export class ChatService {
 
                 chatSelected.history[
                     chatSelected.history.length - 1
-                ].parts[0].text = JSON.parse(JSON.stringify(tempChunk));
+                ].parts[0].text = JSON.parse(
+                    JSON.stringify(this.chatChunkStream())
+                );
 
-                tempChunk = '';
-                this.dispathChatChunk.next('');
-                return;
+                this.chatChunkStream.set('');
             }
         });
     }
 
     /**
-     * @description Observable to get chat chunk
+     * @description Signal to get chat chunk
      */
-    chatChunkStream: Observable<string>;
+    chatChunkStream: WritableSignal<string>;
 
     /**
      * @description Select a chat by chat id
@@ -258,7 +244,6 @@ export class ChatService {
             this.chatList.set([...this.chatList()]);
 
             this.isStreaming.set(true);
-            this.dispathChatChunk.next('...');
 
             this.socketService.sendMessages({
                 history: chatSelected.history.slice(0, -1),
@@ -308,7 +293,6 @@ export class ChatService {
             if (!chatSelected) return resolve();
 
             this.isStreaming.set(true);
-            this.dispathChatChunk.next('...');
 
             this.socketService.sendMessages({
                 history: chatSelected.history.slice(0, -1),

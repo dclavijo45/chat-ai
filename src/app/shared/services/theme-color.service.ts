@@ -1,8 +1,13 @@
-import { afterNextRender, inject, Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
+import {
+    afterNextRender,
+    inject,
+    Injectable,
+    signal,
+    WritableSignal,
+} from '@angular/core';
 
-import { ThemeColorEnum } from '../enums/theme-color.enum';
 import { CookieService } from 'ngx-cookie-service';
+import { ThemeColorEnum } from '../enums/theme-color.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -13,13 +18,11 @@ export class ThemeColorService {
 
         const themeColorStore = this.cookieService.get('theme_color');
 
-        this.dispathThemeColor = new BehaviorSubject<ThemeColorEnum>(
+        this.themeColor = signal<ThemeColorEnum>(
             themeColorStore == ThemeColorEnum.dark
                 ? ThemeColorEnum.dark
                 : ThemeColorEnum.light
         );
-
-        this.themeColor = this.dispathThemeColor.asObservable();
 
         afterNextRender(() => {
             const darkModeMQ = window.matchMedia(
@@ -27,7 +30,7 @@ export class ThemeColorService {
             );
 
             if (!themeColorStore) {
-                this.dispathThemeColor.next(
+                this.themeColor.set(
                     darkModeMQ.matches
                         ? ThemeColorEnum.dark
                         : ThemeColorEnum.light
@@ -46,14 +49,9 @@ export class ThemeColorService {
     private cookieService: CookieService;
 
     /**
-     * @description Signal for dispatching theme color
+     * @description Signal for theme color
      */
-    private dispathThemeColor: BehaviorSubject<ThemeColorEnum>;
-
-    /**
-     * @description Observable for theme color
-     */
-    themeColor: Observable<ThemeColorEnum>;
+    themeColor: WritableSignal<ThemeColorEnum>;
 
     /**
      * @description Toggle theme color between light and dark
@@ -65,21 +63,19 @@ export class ThemeColorService {
                 'theme_color',
                 event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light
             );
-            return this.dispathThemeColor.next(
+            return this.themeColor.set(
                 event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light
             );
         }
 
-        const currentTheme = await firstValueFrom(this.themeColor);
-
         this.cookieService.set(
             'theme_color',
-            currentTheme == ThemeColorEnum.dark
+            this.themeColor() == ThemeColorEnum.dark
                 ? ThemeColorEnum.light
                 : ThemeColorEnum.dark
         );
-        this.dispathThemeColor.next(
-            currentTheme == ThemeColorEnum.dark
+        this.themeColor.set(
+            this.themeColor() == ThemeColorEnum.dark
                 ? ThemeColorEnum.light
                 : ThemeColorEnum.dark
         );
