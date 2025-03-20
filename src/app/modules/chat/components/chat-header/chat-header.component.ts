@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, output, Output, OutputEmitterRef, signal, WritableSignal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
@@ -15,26 +15,24 @@ import { ThemeColorDirective } from '../../../../shared/directives/theme-color.d
 })
 export class ChatHeaderComponent {
     constructor(){
-        this.toggleChatListE = new EventEmitter();
-
-        this.toggleChatListV = false;
+        this.toggleChatListV = signal(false);
     }
 
     /**
      * @description Emits an event to toggle the chat list
      */
-    @Output() toggleChatListE: EventEmitter<void>;
+    toggleChatListE: OutputEmitterRef<void> = output();
 
     /**
      * @description Toggles state the chat list
      */
-    toggleChatListV: boolean;
+    toggleChatListV: WritableSignal<boolean>;
 
     /**
      * @description Toggles the chat list
      */
     toggleChatList(): void {
-        this.toggleChatListV = !this.toggleChatListV;
+        this.toggleChatListV.update((value) => !value);
         this.toggleChatListE.emit();
     }
 }

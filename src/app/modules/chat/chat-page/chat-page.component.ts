@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, WritableSignal } from '@angular/core';
 
 import { ChatHeaderComponent } from '../components/chat-header/chat-header.component';
 import { ChatHistoryComponent } from '../components/chat-history/chat-history.component';
@@ -13,18 +13,18 @@ import { ChatListComponent } from '../components/chat-list/chat-list.component';
 })
 export class ChatPageComponent {
     constructor() {
-        this.toggleChatList = false;
+        this.toggleChatList = signal(false);
     }
 
     /**
      * @description Toggle state chat list
      */
-    toggleChatList: boolean;
+    toggleChatList: WritableSignal<boolean>;
 
     /**
      * @description Toggle chat list
      */
     toggleChatListM(): void {
-        this.toggleChatList = !this.toggleChatList;
+        this.toggleChatList.update((v) => !v);
     }
 }
