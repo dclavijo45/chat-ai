@@ -5,7 +5,7 @@ main {
         "chat_list chat_history";
     grid-template-columns: 260px 1fr;
     grid-template-rows: 50px 1fr;
-    height: 100dvh;
+    height: calc(var(--vh) * 100);
     width: 100vw;
     position: absolute;
 }
@@ -35,7 +35,7 @@ chat-header {
         position: absolute;
         z-index: -1;
         width: 0px;
-        height: 100dvh;
+        height: calc(var(--vh) * 100);
         opacity: 0;
     }
 

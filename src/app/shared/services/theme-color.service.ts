@@ -61,7 +61,8 @@ export class ThemeColorService {
         if (event) {
             this.cookieService.set(
                 'theme_color',
-                event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light
+                event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light,
+                365
             );
             return this.themeColor.set(
                 event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light
@@ -72,7 +73,8 @@ export class ThemeColorService {
             'theme_color',
             this.themeColor() == ThemeColorEnum.dark
                 ? ThemeColorEnum.light
-                : ThemeColorEnum.dark
+                : ThemeColorEnum.dark,
+            365
         );
         this.themeColor.set(
             this.themeColor() == ThemeColorEnum.dark

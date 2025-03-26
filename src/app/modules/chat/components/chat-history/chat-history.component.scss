@@ -43,7 +43,7 @@ main.dark {
     margin-top: 3.5rem;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 58dvh;
+    max-height: calc(var(--vh) * 58);
 }
 
 .chat-element {

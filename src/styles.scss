@@ -1,6 +1,6 @@
-@import 'tippy.js/dist/tippy.css';
-@import 'tippy.js/themes/light.css';
-@import 'tippy.js/animations/scale.css';
+@import "tippy.js/dist/tippy.css";
+@import "tippy.js/themes/light.css";
+@import "tippy.js/animations/scale.css";
 
 @font-face {
     font-family: "soehne-semibold";
@@ -10,20 +10,6 @@
 @font-face {
     font-family: "soehne-book";
     src: url("/assets/fonts/soehne-book.woff2") format("woff2");
-}
-
-* {
-    font-family: soehne-book, ui-sans-serif, system-ui, -apple-system,
-        "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif,
-        "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
-        "Segoe UI Symbol", "Noto Color Emoji";
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    height: 100dvh;
-    overflow: hidden;
 }
 
 :root {
@@ -40,6 +26,28 @@ body {
     --color-2: rgb(170, 170, 170);
     --input-user-color: #f8f8f8;
     --color-3: #f9f9f9;
+
+    --vh: 1vh;
+}
+
+@supports (height: 100dvh) {
+    :root {
+        --vh: 1dvh;
+    }
+}
+
+* {
+    font-family: soehne-book, ui-sans-serif, system-ui, -apple-system,
+        "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif,
+        "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji",
+        "Segoe UI Symbol", "Noto Color Emoji";
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    height: calc(var(--vh) * 100);
+    overflow: hidden;
 }
 
 i.material-icons-outlined {
