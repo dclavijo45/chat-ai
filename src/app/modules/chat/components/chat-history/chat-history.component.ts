@@ -93,8 +93,6 @@ export class ChatHistoryComponent {
             this.chatService;
 
         effect(() => {
-            console.log('AiEngine updated');
-
             if (
                 [AiEngineEnum.deepseek, AiEngineEnum.perplexity].includes(
                     aiEngine()
@@ -113,8 +111,6 @@ export class ChatHistoryComponent {
         });
 
         effect(() => {
-            console.log('Chat list updated');
-
             const chatHistory = chatList().find(
                 (chat) => chat.id == untracked(chatSelect)
             );
@@ -125,8 +121,6 @@ export class ChatHistoryComponent {
         });
 
         effect(() => {
-            console.log('Chat select updated');
-
             if (!chatSelect()) {
                 this.chatHistory.set({
                     history: [],
