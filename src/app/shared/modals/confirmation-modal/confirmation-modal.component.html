@@ -1,0 +1,10 @@
+<main>
+    <h4>{{ ref.data.title}}</h4>
+
+    <p>{{ ref.data.message }}</p>
+
+    <div class="btn-actions">
+        <button class="btn cancel" (click)="ref.close(false)">{{ ref.data.cancelButtonText }}</button>
+        <button class="btn confirm" (click)="ref.close(true)">{{ ref.data.confirmButtonText }}</button>
+    </div>
+</main>

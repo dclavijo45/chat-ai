@@ -14,15 +14,7 @@ import { ThemeColorEnum } from '../enums/theme-color.enum';
 })
 export class ThemeColorService {
     constructor() {
-        this.cookieService = inject(CookieService);
-
         const themeColorStore = this.cookieService.get('theme_color');
-
-        this.themeColor = signal<ThemeColorEnum>(
-            themeColorStore == ThemeColorEnum.dark
-                ? ThemeColorEnum.dark
-                : ThemeColorEnum.light
-        );
 
         afterNextRender(() => {
             const darkModeMQ = window.matchMedia(
@@ -30,7 +22,7 @@ export class ThemeColorService {
             );
 
             if (!themeColorStore) {
-                this.themeColor.set(
+                this.dpThemeColor.set(
                     darkModeMQ.matches
                         ? ThemeColorEnum.dark
                         : ThemeColorEnum.light
@@ -46,12 +38,22 @@ export class ThemeColorService {
     /**
      * @description Cookie service for manage cookies
      */
-    private cookieService: CookieService;
+    private cookieService: CookieService = inject(CookieService);
 
     /**
      * @description Signal for theme color
      */
-    themeColor: WritableSignal<ThemeColorEnum>;
+    private dpThemeColor: WritableSignal<ThemeColorEnum> = signal<ThemeColorEnum>(
+            this.cookieService.get('theme_color') == ThemeColorEnum.dark
+                ? ThemeColorEnum.dark
+                : ThemeColorEnum.light
+        );
+
+
+    /**
+     * @description Readonly signal for the current theme color
+     */
+    public readonly themeColor = this.dpThemeColor.asReadonly();
 
     /**
      * @description Toggle theme color between light and dark
@@ -64,20 +66,20 @@ export class ThemeColorService {
                 event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light,
                 365
             );
-            return this.themeColor.set(
+            return this.dpThemeColor.set(
                 event.matches ? ThemeColorEnum.dark : ThemeColorEnum.light
             );
         }
 
         this.cookieService.set(
             'theme_color',
-            this.themeColor() == ThemeColorEnum.dark
+            this.dpThemeColor() == ThemeColorEnum.dark
                 ? ThemeColorEnum.light
                 : ThemeColorEnum.dark,
             365
         );
-        this.themeColor.set(
-            this.themeColor() == ThemeColorEnum.dark
+        this.dpThemeColor.set(
+            this.dpThemeColor() == ThemeColorEnum.dark
                 ? ThemeColorEnum.light
                 : ThemeColorEnum.dark
         );

@@ -14,7 +14,15 @@
             "cant-change-model-started-chat": "No puedes cambiar de modelo ai en una conversación ya comenzada",
             "cant-add-chat-while-streaming": "No puedes agregar un chat mientras está en espera de respuesta",
             "cant-add-conversation-before-start-chat": "No puedes agregar un chat hasta que el chat actual haya comenzado",
-            "cant-remove-chat-while-streaming": "No puedes eliminar el chat mientras está en espera de respuesta"
+            "cant-remove-chat-while-streaming": "No puedes eliminar el chat mientras está en espera de respuesta",
+            "confirmation-remove-chat-modal-title": "Eliminar chat",
+            "confirmation-remove-chat-modal-message": "¿Estás seguro de que deseas eliminar este chat?",
+            "confirmation-remove-chat-modal-confirm-button": "Eliminar",
+            "confirmation-remove-chat-modal-cancel-button": "Cancelar",
+            "confirmation-clean-chats-modal-title": "Limpiar chats",
+            "confirmation-clean-chats-modal-message": "¿Estás seguro de que deseas limpiar todos los chats?",
+            "confirmation-clean-chats-modal-confirm-button": "Limpiar",
+            "confirmation-clean-chats-modal-cancel-button": "Cancelar"
         },
         "chat-history": {
             "user-photo": "Foto de usuario",

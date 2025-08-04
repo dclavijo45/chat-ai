@@ -1,8 +1,10 @@
 import {
     ChangeDetectionStrategy,
     Component,
+    Signal,
     WritableSignal,
     afterNextRender,
+    computed,
     inject,
     signal,
 } from '@angular/core';
@@ -11,7 +13,6 @@ import { CommonModule } from '@angular/common';
 import { TippyDirective } from '@ngneat/helipopper';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
-import { connect } from 'ngxtension/connect';
 import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
@@ -21,6 +22,8 @@ import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
 import { NotifyService } from '../../../../shared/services/notify.service';
+import { DialogService } from '@ngneat/dialog';
+import { ConfirmationModalComponent } from '../../../../shared/modals/confirmation-modal/confirmation-modal.component';
 
 @Component({
     selector: 'chat-list',
@@ -37,19 +40,6 @@ import { NotifyService } from '../../../../shared/services/notify.service';
 })
 export class ChatListComponent {
     constructor() {
-        this.chatService = inject(ChatService);
-        this.themeColorService = inject(ThemeColorService);
-        this.translateService = inject(TranslateService);
-        this.notifyService = inject(NotifyService);
-
-        this.chatList = signal<IChat[]>([]);
-        this.aiEngine = signal(AiEngineEnum.deepseek);
-        this.chatSelected = signal<string>('');
-
-        connect(this.chatList, () => this.chatService.chatList());
-        connect(this.chatSelected, () => this.chatService.chatSelect());
-        connect(this.aiEngine, () => this.chatService.aiEngine());
-
         this.AiEngineEnum = AiEngineEnum;
         this.aiEngineList = Object.values(AiEngineEnum);
 
@@ -58,40 +48,48 @@ export class ChatListComponent {
         });
     }
 
+    ngOnInit(): void {
+    }
+
     /**
      * @description Service for managing chat data api
      */
-    private chatService: ChatService;
+    private chatService: ChatService = inject(ChatService);
 
     /**
      * @description Translate service for the app
      */
-    private translateService: TranslateService;
+    private translateService: TranslateService = inject(TranslateService);
 
     /**
      * @description Service for managing notifications
      */
-    private notifyService: NotifyService;
+    private notifyService: NotifyService = inject(NotifyService);
+
+    /**
+     * @description Dialog service for managing modals and dialogs
+     */
+    private dialogService = inject(DialogService);
 
     /**
      * @description Service for managing theme color design
      */
-    themeColorService: ThemeColorService;
+    themeColorService: ThemeColorService = inject(ThemeColorService);
 
     /**
      * @description List of chat data
      */
-    chatList: WritableSignal<IChat[]>;
+    chatList: Signal<IChat[]> = this.chatService.chatList;
 
     /**
      * @description Selected chat id
      */
-    chatSelected: WritableSignal<string>;
+    chatSelected: Signal<string> = this.chatService.chatSelect;
 
     /**
      * @description Selected chat ai engine
      */
-    aiEngine: WritableSignal<AiEngineEnum>;
+    aiEngine: Signal<AiEngineEnum> = this.chatService.aiEngine;
 
     /**
      * @description Enum for ai engine
@@ -104,11 +102,9 @@ export class ChatListComponent {
     aiEngineList: AiEngineEnum[];
 
     /**
-     * @description Getter for theme color
+     * @description Theme color for the app
      */
-    get themeColor(): WritableSignal<ThemeColorEnum> {
-        return this.themeColorService.themeColor;
-    }
+    themeColor: Signal<ThemeColorEnum> = this.themeColorService.themeColor;
 
     /**
      * @description Languages list
@@ -149,11 +145,37 @@ export class ChatListComponent {
 
     /**
      * @description Remove chat from chat list
+     *
      * @param e event parent element for prevent click
      * @param chat chat to remove
      */
-    removeChat(e: Event, chat: IChat): void {
+    async removeChat(e: Event, chat: IChat): Promise<void> {
         e.stopPropagation();
+
+        const confirmation = await new Promise<boolean>((resolve) => {
+            this.dialogService.open(ConfirmationModalComponent, {
+                data: {
+                    title: this.translateService.instant(
+                        'chat.chat-list.confirmation-remove-chat-modal-title'
+                    ),
+                    message: this.translateService.instant(
+                        'chat.chat-list.confirmation-remove-chat-modal-message'
+                    ),
+                    confirmButtonText: this.translateService.instant(
+                        'chat.chat-list.confirmation-remove-chat-modal-confirm-button'
+                    ),
+                    cancelButtonText: this.translateService.instant(
+                        'chat.chat-list.confirmation-remove-chat-modal-cancel-button'
+                    ),
+                },
+                backdrop: true,
+                enableClose: false
+            }).afterClosed$.subscribe((result) => resolve(result ?? false));
+        });
+
+        if (!confirmation) {
+            return;
+        }
 
         this.chatService.removeChat(chat);
     }
@@ -176,7 +198,32 @@ export class ChatListComponent {
     /**
      * @description Clean chat list
      */
-    cleanChatList(): void {
+    async cleanChatList(): Promise<void> {
+        const confirmation = await new Promise<boolean>((resolve) => {
+            this.dialogService.open(ConfirmationModalComponent, {
+                data: {
+                    title: this.translateService.instant(
+                        'chat.chat-list.confirmation-clean-chats-modal-title'
+                    ),
+                    message: this.translateService.instant(
+                        'chat.chat-list.confirmation-clean-chats-modal-message'
+                    ),
+                    confirmButtonText: this.translateService.instant(
+                        'chat.chat-list.confirmation-clean-chats-modal-confirm-button'
+                    ),
+                    cancelButtonText: this.translateService.instant(
+                        'chat.chat-list.confirmation-clean-chats-modal-cancel-button'
+                    ),
+                },
+                backdrop: true,
+                enableClose: false
+            }).afterClosed$.subscribe((result) => resolve(result ?? false));
+        });
+
+        if (!confirmation) {
+            return;
+        }
+
         this.chatService.cleanChatList();
     }
 

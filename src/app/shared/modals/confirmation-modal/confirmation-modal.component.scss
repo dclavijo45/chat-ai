@@ -1,0 +1,38 @@
+h4 {
+    text-align: center;
+}
+
+p {
+    text-align: center;
+}
+
+.btn-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    justify-items: center;
+    margin-bottom: 1rem;
+}
+
+.btn {
+    outline: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: filter 200ms ease-in-out;
+    cursor: pointer;
+}
+
+.btn:hover {
+    filter: brightness(85%);
+}
+
+.btn.cancel {
+    background-color: #3290dc;
+    color: #fff;
+}
+
+.btn.confirm {
+    background-color: #dc3232;
+    color: #fff;
+}

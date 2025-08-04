@@ -4,12 +4,14 @@ import {
     ChangeDetectorRef,
     Component,
     computed,
+    effect,
     ElementRef,
     inject,
     Signal,
     signal,
+    untracked,
     viewChild,
-    WritableSignal
+    WritableSignal,
 } from '@angular/core';
 import {
     FormControl,
@@ -23,8 +25,6 @@ import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MarkdownModule } from 'ngx-markdown';
-import { connect } from 'ngxtension/connect';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { TrimValidator } from '../../../../shared/form-validators/trim.validator';
 import { NotifyService } from '../../../../shared/services/notify.service';
@@ -57,12 +57,6 @@ import { SocketService } from '../../services/socket.service';
 })
 export class ChatHistoryComponent {
     constructor() {
-        this.chatService = inject(ChatService);
-        this.cdr = inject(ChangeDetectorRef);
-        this.notifyService = inject(NotifyService);
-        this.socketService = inject(SocketService);
-        this.translateService = inject(TranslateService);
-
         this.userInputPrompt = new FormControl<string | null>('', [
             Validators.required,
             TrimValidator(),
@@ -71,12 +65,8 @@ export class ChatHistoryComponent {
         this.chatHistory = signal({
             history: [],
             id: crypto.randomUUID(),
-            aiEngine: AiEngineEnum.deepseek,
+            aiEngine: AiEngineEnum.openai,
         });
-        this.isServerConnected = signal(false);
-        this.isStreaming = signal(false);
-        this.imagesList = signal([]);
-        this.chatChunkStream = signal('');
 
         const userInputPromptValid = toSignal(
             this.userInputPrompt.statusChanges.pipe(
@@ -95,41 +85,95 @@ export class ChatHistoryComponent {
         this.TypePartEnum = TypePartEnum;
         this.IHRole = IHRole;
 
-        connect(this.isStreaming, () => this.chatService.isStreaming());
-        connect(this.isServerConnected, () => this.socketService.isConnected());
-        connect(this.chatChunkStream, () => this.chatService.chatChunkStream());
-
         afterNextRender(() => {
             this.socketService.connect();
         });
 
-        this.listenSignals();
+        const { aiEngine, chatList, chatSelect } =
+            this.chatService;
+
+        effect(() => {
+            console.log('AiEngine updated');
+
+            if (
+                [AiEngineEnum.deepseek, AiEngineEnum.perplexity].includes(
+                    aiEngine()
+                )
+            ) {
+                if (untracked(this.imagesList).length) {
+                    const textTranslation = this.translateService.instant(
+                        'chat.chat-history.current-model-not-support-img'
+                    );
+
+                    this.notifyService.error(textTranslation);
+
+                    this.imagesList.set([]);
+                }
+            }
+        });
+
+        effect(() => {
+            console.log('Chat list updated');
+
+            const chatHistory = chatList().find(
+                (chat) => chat.id == untracked(chatSelect)
+            );
+
+            if (chatHistory) {
+                this.chatHistory.set(chatHistory);
+            }
+        });
+
+        effect(() => {
+            console.log('Chat select updated');
+
+            if (!chatSelect()) {
+                this.chatHistory.set({
+                    history: [],
+                    id: crypto.randomUUID(),
+                    aiEngine: untracked(aiEngine),
+                });
+                return;
+            }
+
+            const chatHistory = untracked(chatList).find(
+                (chat) => chat.id == chatSelect()
+            );
+
+            if (chatHistory) {
+                this.chatHistory.set(chatHistory);
+            }
+
+            setTimeout(() => {
+                this.scrollHistory(true);
+            }, 100);
+        });
     }
 
     /**
      * @description Service to manage chat history
      */
-    private chatService: ChatService;
+    private chatService: ChatService = inject(ChatService);
 
     /**
      * @description Change detector reference to update the view
      */
-    private cdr: ChangeDetectorRef;
+    private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
     /**
      * @description Service to notify messages to the user
      */
-    private notifyService: NotifyService;
+    private notifyService: NotifyService = inject(NotifyService);
 
     /**
      * @description Service to manage the socket connection
      */
-    private socketService: SocketService;
+    private socketService: SocketService = inject(SocketService);
 
     /**
      * @description Service to manage the translations
      */
-    private translateService: TranslateService;
+    private translateService: TranslateService = inject(TranslateService);
 
     /**
      * @description html element reference to the chat history list
@@ -145,7 +189,7 @@ export class ChatHistoryComponent {
     /**
      * @description Chat chunk stream signal to manage the chat chunk stream
      */
-    chatChunkStream: WritableSignal<string>;
+    chatChunkStream: Signal<string> = this.chatService.chatChunkStream
 
     /**
      * @description User input prompt form control
@@ -155,7 +199,7 @@ export class ChatHistoryComponent {
     /**
      * @description List of images selected by user to send to the chat server
      */
-    imagesList: WritableSignal<IChatImage[]>;
+    imagesList: WritableSignal<IChatImage[]> = signal<IChatImage[]>([]);
 
     /**
      * @description Enum to manage the type of part in the chat history
@@ -175,90 +219,12 @@ export class ChatHistoryComponent {
     /**
      * @description Flag if is streaming a chat server response
      */
-    isStreaming: WritableSignal<boolean>;
+    isStreaming: Signal<boolean> = this.chatService.isStreaming;
 
     /**
      * @description Flag if the server is connected
      */
-    isServerConnected: WritableSignal<boolean>;
-
-    /**
-     * @description Listen signals for manage actions
-     */
-    private listenSignals(): void {
-        explicitEffect(
-            [this.chatService.aiEngine],
-            ([aiEngine]) => {
-                if (
-                    [AiEngineEnum.deepseek, AiEngineEnum.perplexity].includes(
-                        aiEngine
-                    )
-                ) {
-                    if (this.imagesList().length) {
-                        const textTranslation = this.translateService.instant(
-                            'chat.chat-history.current-model-not-support-img'
-                        );
-
-                        this.notifyService.error(textTranslation);
-
-                        this.imagesList.set([]);
-                    }
-                }
-            },
-            { defer: true }
-        );
-
-        explicitEffect(
-            [this.chatService.chatList],
-            ([chatList]) => {
-                const chatSelected = this.chatService.chatSelect();
-                const chatHistory = chatList.find(
-                    (chat) => chat.id == chatSelected
-                );
-
-                if (chatHistory) {
-                    this.chatHistory.set(chatHistory);
-                }
-            },
-            { defer: true }
-        );
-
-        explicitEffect(
-            [this.chatService.chatSelect],
-            ([chatSelect]) => {
-                if (!chatSelect) {
-                    this.chatHistory.set({
-                        history: [],
-                        id: crypto.randomUUID(),
-                        aiEngine: this.chatService.aiEngine(),
-                    });
-                    return;
-                }
-
-                const chatList = this.chatService.chatList();
-                const chatHistory = chatList.find(
-                    (chat) => chat.id == chatSelect
-                );
-
-                if (chatHistory) {
-                    this.chatHistory.set(chatHistory);
-                }
-
-                setTimeout(() => {
-                    this.scrollHistory(true);
-                }, 100);
-            },
-            { defer: true }
-        );
-
-        explicitEffect(
-            [this.chatService.chatChunkStream],
-            ([chunk]) => {
-                this.scrollHistory();
-            },
-            { defer: true }
-        );
-    }
+    isServerConnected: Signal<boolean> = this.socketService.isConnected;
 
     /**
      * @description Send message to the chat server

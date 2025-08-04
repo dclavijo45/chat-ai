@@ -1,4 +1,4 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { inject, Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -12,49 +12,38 @@ import {
     providedIn: 'root',
 })
 export class SocketService {
-    constructor() {
-        this.socket = inject(Socket);
-
-        this.dispatchMessage = new Subject<IMessageWSResponse>();
-        this.isConnected = signal<boolean>(false);
-
-        this.listenMessage = this.dispatchMessage.asObservable();
-
-        this.timerPing = 0;
-    }
-
     /**
      * @description Socket instance for managing connection
      */
-    private socket: Socket;
+    private socket: Socket = inject(Socket);
 
     /**
      * @description Signal for dispatching message
      */
-    private dispatchMessage: Subject<IMessageWSResponse>;
+    private dispatchMessage: Subject<IMessageWSResponse> = new Subject<IMessageWSResponse>();
 
     /**
      * @description Timer for ping socket server
      */
-    private timerPing: number;
+    private timerPing: number = 0;
 
     /**
      * @description Listen to the socket events
      */
     private listenSocketServerEvents(): void {
         this.socket
-            .fromEvent<IGlobalWSRequestResponse<IMessageWSResponse>>('message')
+            .fromEvent<IGlobalWSRequestResponse<IMessageWSResponse>, string>('message')
             .subscribe((response) => {
                 this.dispatchMessage.next(response.payload);
             });
 
         this.socket.fromEvent('connect').subscribe(() => {
-            this.isConnected.update(() => true);
+            this.dpIsConnected.update(() => true);
             this.triggerPing();
         });
 
         this.socket.fromEvent('disconnect').subscribe(() => {
-            this.isConnected.update(() => false);
+            this.dpIsConnected.update(() => false);
 
             clearInterval(this.timerPing);
             this.timerPing = 0;
@@ -93,12 +82,18 @@ export class SocketService {
     /**
      * @description Signal for dispatching connection status
      */
-    public isConnected: WritableSignal<boolean>;
+    private dpIsConnected: WritableSignal<boolean> = signal<boolean>(false);
+
+    /**
+     * @description Readonly signal for the current connection status
+     */
+    public readonly isConnected: Signal<boolean> =
+        this.dpIsConnected.asReadonly();
 
     /**
      * @description Listen to the message from the socket server
      */
-    public listenMessage: Observable<IMessageWSResponse>;
+    public listenMessage: Observable<IMessageWSResponse> = this.dispatchMessage.asObservable();
 
     /**
      * @description Connect to the socket server

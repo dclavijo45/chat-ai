@@ -2,8 +2,9 @@ import {
     afterNextRender,
     inject,
     Injectable,
+    Signal,
     signal,
-    WritableSignal
+    WritableSignal,
 } from '@angular/core';
 import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
@@ -19,17 +20,6 @@ import { SocketService } from './socket.service';
 })
 export class ChatService {
     constructor() {
-        this.notifyService = inject(NotifyService);
-        this.socketService = inject(SocketService);
-        this.translateService = inject(TranslateService);
-
-        this.chatChunkStream = signal('');
-        this.chatList = signal<IChat[]>([]);
-        this.chatSelect = signal('');
-        this.aiEngine = signal(AiEngineEnum.grok);
-        this.isStreaming = signal(false);
-        this.allowStoreChats = signal(false);
-
         this.listenMessage();
 
         afterNextRender(() => {
@@ -37,57 +27,94 @@ export class ChatService {
             this.getPermissionStoreChats();
         });
     }
+
     /**
      * @description Notify service for show messages to user
      */
-    private notifyService: NotifyService;
+    private notifyService: NotifyService = inject(NotifyService);
 
     /**
      * @description Socket service managing connection
      */
-    private socketService: SocketService;
+    private socketService: SocketService = inject(SocketService);
 
     /**
      * @description Translate service for translate messages
      */
-    private translateService: TranslateService;
+    private translateService: TranslateService = inject(TranslateService);
 
     /**
      * @description Signal to dispatch chat list
      */
-    public chatList: WritableSignal<IChat[]>;
+    private dpChatList: WritableSignal<IChat[]> = signal<IChat[]>([]);
 
     /**
      * @description Signal to dispatch chat id selected
      */
-    public chatSelect: WritableSignal<string>;
+    private dpChatSelect: WritableSignal<string> = signal<string>('');
 
     /**
      * @description Signal to dispatch AI engine
      */
-    public aiEngine: WritableSignal<AiEngineEnum>;
+    private dpAiEngine: WritableSignal<AiEngineEnum> = signal<AiEngineEnum>(
+        AiEngineEnum.openai
+    );
 
     /**
      * @description Signal to dispatch if is streaming a chat server response
      */
-    public isStreaming: WritableSignal<boolean>;
+    private dpIsStreaming: WritableSignal<boolean> = signal<boolean>(false);
 
     /**
      * @description Signal to get chat chunk
      */
-    public chatChunkStream: WritableSignal<string>;
+    private dpChatChunkStream: WritableSignal<string> = signal<string>('');
 
     /**
      * @description Signal to get permission to store chats from local storage
      */
-    public allowStoreChats: WritableSignal<boolean>;
+    private dpAllowStoreChats: WritableSignal<boolean> = signal<boolean>(false);
+
+    /**
+     * @description Readonly signal for the current chat id selected
+     */
+    public readonly chatSelect: Signal<string> = this.dpChatSelect.asReadonly();
+
+    /**
+     * @description Readonly signal for the current AI engine
+     */
+    public readonly aiEngine: Signal<AiEngineEnum> =
+        this.dpAiEngine.asReadonly();
+
+    /**
+     * @description Readonly signal for the current streaming state
+     */
+    public readonly isStreaming: Signal<boolean> =
+        this.dpIsStreaming.asReadonly();
+
+    /**
+     * @description Readonly signal for the current chat list
+     */
+    public readonly chatList: Signal<IChat[]> = this.dpChatList.asReadonly();
+
+    /**
+     * @description Readonly signal for the current chat chunk
+     */
+    public readonly chatChunkStream: Signal<string> =
+        this.dpChatChunkStream.asReadonly();
+
+    /**
+     * @description Readonly signal for the current permission to store chats
+     */
+    public readonly allowStoreChats: Signal<boolean> =
+        this.dpAllowStoreChats.asReadonly();
 
     /**
      * @description Listen message from socket service
      */
     private listenMessage(): void {
         this.socketService.listenMessage.subscribe((message) => {
-            this.chatChunkStream.update(
+            this.dpChatChunkStream.update(
                 (chunk) => chunk + message.messageChunk
             );
 
@@ -96,7 +123,7 @@ export class ChatService {
             }
 
             if (message.state == StateMessageWSEnum.END_STREAMING) {
-                this.isStreaming.set(false);
+                this.dpIsStreaming.set(false);
 
                 const chatList = this.chatList();
                 const chatSelected = chatList.find(
@@ -111,7 +138,7 @@ export class ChatService {
                     JSON.stringify(this.chatChunkStream())
                 );
 
-                this.chatChunkStream.set('');
+                this.dpChatChunkStream.set('');
                 this.saveChatsStorage();
             }
         });
@@ -132,7 +159,7 @@ export class ChatService {
     private getPermissionStoreChats(): void {
         const allowStoreChats = localStorage.getItem('allowStoreChats');
 
-        this.allowStoreChats.set(allowStoreChats == '1');
+        this.dpAllowStoreChats.set(allowStoreChats == '1');
     }
 
     /**
@@ -143,7 +170,7 @@ export class ChatService {
         const chatList = localStorage.getItem('chatList');
 
         if (chatList) {
-            this.chatList.set(JSON.parse(chatList));
+            this.dpChatList.set(JSON.parse(chatList));
         }
     }
 
@@ -153,8 +180,8 @@ export class ChatService {
     cleanChatList(): void {
         if (!this.chatList().length || this.isStreaming()) return;
 
-        this.chatList.set([]);
-        this.chatSelect.set('');
+        this.dpChatList.set([]);
+        this.dpChatSelect.set('');
 
         localStorage.removeItem('chatList');
     }
@@ -165,9 +192,12 @@ export class ChatService {
     toggleStoreChatsPermission(): void {
         const allowStoreChats = this.allowStoreChats();
 
-        localStorage.setItem('allowStoreChats', Number(!allowStoreChats).toString());
+        localStorage.setItem(
+            'allowStoreChats',
+            Number(!allowStoreChats).toString()
+        );
 
-        this.allowStoreChats.set(!allowStoreChats);
+        this.dpAllowStoreChats.set(!allowStoreChats);
     }
 
     /**
@@ -183,7 +213,7 @@ export class ChatService {
             return;
         }
 
-        this.chatList.update((value) => {
+        this.dpChatList.update((value) => {
             const index = value.findIndex((chatE) => chatE.id == chat.id);
 
             if (index == -1) return value;
@@ -194,7 +224,7 @@ export class ChatService {
         });
 
         if (this.chatSelect() == chat.id) {
-            this.chatSelect.set('');
+            this.dpChatSelect.set('');
         }
 
         this.saveChatsStorage();
@@ -216,7 +246,7 @@ export class ChatService {
 
         if (this.chatSelect() == chatId) return;
 
-        const chatList = this.chatList.asReadonly()();
+        const chatList = this.dpChatList.asReadonly()();
 
         const chatSelected = chatList.find((chat) => chat.id == chatId);
 
@@ -224,10 +254,10 @@ export class ChatService {
             return;
         }
 
-        this.chatSelect.set(chatId);
+        this.dpChatSelect.set(chatId);
 
         if (chatSelected.history.length) {
-            this.aiEngine.set(chatSelected.aiEngine);
+            this.dpAiEngine.set(chatSelected.aiEngine);
         }
     }
 
@@ -246,7 +276,7 @@ export class ChatService {
         }
 
         if (!this.chatSelect()) {
-            this.aiEngine.set(engine);
+            this.dpAiEngine.set(engine);
             return;
         }
 
@@ -270,7 +300,7 @@ export class ChatService {
 
         chatSelected.aiEngine = engine;
 
-        this.aiEngine.set(engine);
+        this.dpAiEngine.set(engine);
     }
 
     /**
@@ -297,7 +327,7 @@ export class ChatService {
 
         const chatId = crypto.randomUUID();
 
-        this.chatList.update((value) => {
+        this.dpChatList.update((value) => {
             value.push({
                 history: [],
                 id: chatId,
@@ -307,7 +337,7 @@ export class ChatService {
             return value;
         });
 
-        this.chatSelect.set(chatId);
+        this.dpChatSelect.set(chatId);
     }
 
     /**
@@ -322,7 +352,7 @@ export class ChatService {
             this.addChat();
         }
 
-        this.chatList.update((chatList) => {
+        this.dpChatList.update((chatList) => {
             chatSelected = chatList.find(
                 (chat) => chat.id == this.chatSelect()
             );
@@ -350,9 +380,9 @@ export class ChatService {
 
         if (!chatSelected) return;
 
-        this.chatList.set([...this.chatList()]);
+        this.dpChatList.set([...this.chatList()]);
 
-        this.isStreaming.set(true);
+        this.dpIsStreaming.set(true);
 
         this.socketService.sendMessages({
             history: chatSelected.history.slice(0, -1),
@@ -370,7 +400,7 @@ export class ChatService {
         return new Promise<void>(async (resolve) => {
             let chatSelected: IChat | undefined;
 
-            this.chatList.update((chatList) => {
+            this.dpChatList.update((chatList) => {
                 chatSelected = chatList.find(
                     (chat) => chat.id == this.chatSelect()
                 );
@@ -398,7 +428,7 @@ export class ChatService {
 
             if (!chatSelected) return resolve();
 
-            this.isStreaming.set(true);
+            this.dpIsStreaming.set(true);
 
             this.socketService.sendMessages({
                 history: chatSelected.history.slice(0, -1),
