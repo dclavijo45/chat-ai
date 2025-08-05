@@ -2,9 +2,8 @@ import {
     Directive,
     ElementRef,
     Renderer2,
-    computed,
     effect,
-    inject,
+    inject
 } from '@angular/core';
 import { ThemeColorEnum } from '../enums/theme-color.enum';
 import { ThemeColorService } from '../services/theme-color.service';
@@ -17,7 +16,7 @@ export class ThemeColorDirective {
     constructor() {
         const themeColor = this.themeColorService.themeColor;
 
-        computed(() => {
+        effect(() => {
             this.renderer2.addClass(
                 this.elementRef.nativeElement,
                 themeColor()
