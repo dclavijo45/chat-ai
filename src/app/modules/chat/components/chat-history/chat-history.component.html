@@ -24,7 +24,7 @@
 
                                     @case (IHRole.model) {
                                         <markdown class="markdown" [lineNumbers]="true"
-                                            [data]="chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()"
+                                            [data]="(chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()) || '...'"
                                             themeColor/>
                                     }
                                 }
