@@ -5,7 +5,7 @@
                 @for (part of chat.parts; track $index) {
                     <div class="chat-element">
                         <img class="chat-element-img"
-                            src="/assets/img/{{chat.role == IHRole.user ? 'user' : 'logo'}}.png"
+                            src="/assets/img/{{chat.role == IHRole.user ? 'user.png' : 'logo.gif'}}"
                             [alt]="'chat.chat-history.user-photo' | translate" width="34" height="34">
 
                         @switch (part.type) {

@@ -1,15 +1,14 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
     Signal,
-    WritableSignal,
     afterNextRender,
-    computed,
-    inject,
-    signal,
+    inject
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
+import { DialogService } from '@ngneat/dialog';
 import { TippyDirective } from '@ngneat/helipopper';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
@@ -17,13 +16,12 @@ import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 import { ThemeColorEnum } from '../../../../shared/enums/theme-color.enum';
 import { I18nLanguage } from '../../../../shared/interfaces/i18n.model';
+import { ConfirmationModalComponent } from '../../../../shared/modals/confirmation-modal/confirmation-modal.component';
+import { NotifyService } from '../../../../shared/services/notify.service';
 import { ThemeColorService } from '../../../../shared/services/theme-color.service';
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
-import { NotifyService } from '../../../../shared/services/notify.service';
-import { DialogService } from '@ngneat/dialog';
-import { ConfirmationModalComponent } from '../../../../shared/modals/confirmation-modal/confirmation-modal.component';
 
 @Component({
     selector: 'chat-list',
@@ -48,9 +46,6 @@ export class ChatListComponent {
         });
     }
 
-    ngOnInit(): void {
-    }
-
     /**
      * @description Service for managing chat data api
      */
@@ -70,6 +65,11 @@ export class ChatListComponent {
      * @description Dialog service for managing modals and dialogs
      */
     private dialogService = inject(DialogService);
+
+    /**
+     * @description Change detector for the component
+     */
+    private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
     /**
      * @description Service for managing theme color design
@@ -178,6 +178,7 @@ export class ChatListComponent {
         }
 
         this.chatService.removeChat(chat);
+        this.cdr.detectChanges();
     }
 
     /**
