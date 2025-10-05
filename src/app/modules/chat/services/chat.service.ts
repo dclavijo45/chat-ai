@@ -1,19 +1,13 @@
-import {
-    afterNextRender,
-    inject,
-    Injectable,
-    Signal,
-    signal,
-    WritableSignal,
-} from '@angular/core';
-import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
+import {afterNextRender, inject, Injectable, Signal, signal, WritableSignal,} from '@angular/core';
+import {IHRole, PartHistory, TypePartEnum} from '../interfaces/history.model';
 
-import { TranslateService } from '@ngx-translate/core';
-import { NotifyService } from '../../../shared/services/notify.service';
-import { AiEngineEnum } from '../enums/ai-engine.enum';
-import { IChat } from '../interfaces/chat.model';
-import { StateMessageWSEnum } from '../interfaces/socket.model';
-import { SocketService } from './socket.service';
+import {TranslateService} from '@ngx-translate/core';
+import {NotifyService} from '../../../shared/services/notify.service';
+import {AiEngineEnum} from '../enums/ai-engine.enum';
+import {IChat} from '../interfaces/chat.model';
+import {StateMessageWSEnum} from '../interfaces/socket.model';
+import {SocketService} from './socket.service';
+import {AuthService} from "./auth.service";
 
 @Injectable({
     providedIn: 'root',
@@ -42,6 +36,11 @@ export class ChatService {
      * @description Translate service for translate messages
      */
     private translateService: TranslateService = inject(TranslateService);
+
+    /**
+     * @description Auth service for user authentication
+     */
+    private authService: AuthService = inject(AuthService);
 
     /**
      * @description Signal to dispatch chat list
@@ -345,7 +344,15 @@ export class ChatService {
      *
      * @param parts user messages to send to AI
      */
-    startChatWs(parts: PartHistory[]): void {
+    async startChatWs(parts: PartHistory[]): Promise<void> {
+        if (this.authService.listenUserAuthenticated() === null) {
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.user-not-authenticated'
+            );
+            this.notifyService.error(textTranslation);
+            return;
+        }
+
         let chatSelected: IChat | undefined;
 
         if (!this.chatSelect()) {
@@ -384,10 +391,13 @@ export class ChatService {
 
         this.dpIsStreaming.set(true);
 
+        const authToken = await this.authService.listenUserAuthenticated()?.getIdToken() ?? '';
+
         this.socketService.sendMessages({
             history: chatSelected.history.slice(0, -1),
             aiEngine: this.aiEngine(),
             conversationId: chatSelected.id,
+            authToken
         });
     }
 
@@ -398,6 +408,14 @@ export class ChatService {
      */
     async conversationWs(parts: PartHistory[]): Promise<void> {
         return new Promise<void>(async (resolve) => {
+            if (this.authService.listenUserAuthenticated() === null) {
+                const textTranslation = this.translateService.instant(
+                    'chat.chat-list.user-not-authenticated'
+                );
+                this.notifyService.error(textTranslation);
+                return resolve();
+            }
+
             let chatSelected: IChat | undefined;
 
             this.dpChatList.update((chatList) => {
@@ -430,10 +448,13 @@ export class ChatService {
 
             this.dpIsStreaming.set(true);
 
+            const authToken = await this.authService.listenUserAuthenticated()?.getIdToken() ?? '';
+
             this.socketService.sendMessages({
                 history: chatSelected.history.slice(0, -1),
                 aiEngine: this.aiEngine(),
                 conversationId: chatSelected.id,
+                authToken
             });
 
             resolve();

@@ -20,6 +20,11 @@ export interface IMessageWSRequest {
      * @description The conversation ID of message.
      */
     conversationId: string;
+
+    /**
+     * @description The authentication token.
+     */
+    authToken: string;
 }
 
 export interface IMessageWSResponse {
@@ -42,6 +47,25 @@ export interface IMessageWSResponse {
 export interface IPingPongPayloadRequest {
     /**
      * @description The ping message.
+     */
+    message: string;
+}
+
+export interface IAuthenticateWSRequest {
+    /**
+     * @description The authentication token.
+     */
+    authToken: string;
+}
+
+export interface IAuthenticateWSResponse {
+    /**
+     * @description Whether the user is authorized or not.
+     */
+    authorized: boolean;
+
+    /**
+     * @description The message of the authorization.
      */
     message: string;
 }

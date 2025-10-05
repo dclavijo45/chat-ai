@@ -39,6 +39,8 @@ import { IChatImage } from '../../interfaces/image.model';
 import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
 import { SocketService } from '../../services/socket.service';
+import {AuthService} from "../../services/auth.service";
+import {User} from "@angular/fire/auth";
 
 @Component({
     selector: 'chat-history',
@@ -170,6 +172,18 @@ export class ChatHistoryComponent {
     private translateService: TranslateService = inject(TranslateService);
 
     /**
+     * @description Service to manage authentication
+     */
+    private authService = inject(AuthService);
+
+    /**
+     * @description Signal to get the authenticated user
+     */
+    get userAuthenticated(): Signal<User | null> {
+        return this.authService.listenUserAuthenticated;
+    }
+
+    /**
      * @description html element reference to the chat history list
      */
     historyList: Signal<ElementRef<HTMLDivElement> | undefined> =
@@ -229,6 +243,15 @@ export class ChatHistoryComponent {
         e.preventDefault();
 
         if (!this.canSendChat()) return;
+
+        if (this.authService.listenUserAuthenticated() === null) {
+            const textTranslation = this.translateService.instant(
+                'chat.chat-list.user-not-authenticated'
+            );
+
+            this.notifyService.error(textTranslation);
+            return;
+        }
 
         const userPrompt: string = JSON.parse(
             JSON.stringify(this.userInputPrompt.value)

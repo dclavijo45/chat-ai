@@ -9,6 +9,9 @@
             "dont-store-chats": "No almacenar chats",
             "store-chats": "Almacenar chats",
             "change-language": "Cambiar idioma",
+            "user-not-authenticated": "Usuario no autenticado, por favor inicia sesión",
+            "login": "Iniciar sesión",
+            "logout": "Cerrar sesión",
             "cant-change-chat-while-streaming": "No puedes cambiar de chat mientras está en espera de respuesta",
             "cant-change-model-while-streaming": "No puedes cambiar de modelo mientras está en espera de respuesta",
             "cant-change-model-started-chat": "No puedes cambiar de modelo ai en una conversación ya comenzada",
@@ -31,7 +34,8 @@
             "send-a-message": "Enviar un mensaje...",
             "current-model-not-support-img" : "El modelo de IA actual no soporta imágenes",
             "support-max-files-number": "Solo se permiten máximo {{maxFiles}} imágenes",
-            "image-size-exceeds-limit": "La imagen {{fileName}} supera el tamaño máximo ({{maxFileSize}}MB)"
+            "image-size-exceeds-limit": "La imagen {{fileName}} supera el tamaño máximo ({{maxFileSize}}MB)",
+            "waiting-message-ai": "La rana está AFK, espera a que responda... \uD83E\uDD97 \n \n  - ![This is an alt text.](https://i.giphy.com/okfvUCpgArv3y.webp)"
         }
     }
 }

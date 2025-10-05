@@ -55,18 +55,42 @@ main.dark {
     margin-bottom: 2.5rem;
 }
 
+.chat-element.user {
+    grid-template-columns: 1fr 43px;
+    grid-template-areas: "chat_element_text chat_element_img";
+}
+
 .chat-element-img {
     grid-area: chat_element_img;
+}
+
+.chat-element-img.rounded {
+    border-radius: 9999px;
 }
 
 .chat-element-text {
     margin-bottom: 0;
     margin-top: 0.5rem;
+    margin-right: 0.5rem;
+    justify-self: end;
     grid-area: chat_element_text;
     font-size: 16px;
     color: rgb(13, 13, 13);
     white-space: pre-wrap;
     transition: color 100ms ease-in-out;
+}
+
+.chat-element-text.user {
+    color: #404040;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    border-top-right-radius: 0;
+    padding: 1rem;
+}
+
+.chat-element-text.user.dark {
+    background-color: #2f2f2f;
+    color: white;
 }
 
 .chat-element-text.dark {

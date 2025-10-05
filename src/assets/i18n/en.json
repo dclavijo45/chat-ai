@@ -9,6 +9,9 @@
             "dont-store-chats": "Don't store chats",
             "store-chats": "Store chats",
             "change-language": "Change language",
+            "user-not-authenticated": "User is not authenticated, please log in",
+            "login": "Login",
+            "logout": "Logout",
             "cant-change-chat-while-streaming": "You can't change chat while waiting for a response",
             "cant-change-model-while-streaming": "You can't change model while waiting for a response",
             "cant-change-model-started-chat": "You can't change ai model in a conversation already started",
@@ -31,7 +34,8 @@
             "send-a-message": "Send a message...",
             "current-model-not-support-img" : "The current AI model does not support images",
             "support-max-files-number": "Only maximum {{maxFiles}} images are allowed",
-            "image-size-exceeds-limit": "The image {{fileName}} exceeds the maximum size ({{maxFileSize}}MB)"
+            "image-size-exceeds-limit": "The image {{fileName}} exceeds the maximum size ({{maxFileSize}}MB)",
+            "waiting-message-ai": "..."
         }
     }
 }

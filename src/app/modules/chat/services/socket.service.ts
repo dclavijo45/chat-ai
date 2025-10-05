@@ -2,6 +2,7 @@ import { inject, Injectable, Signal, signal, WritableSignal } from '@angular/cor
 import { Socket } from 'ngx-socket-io';
 import { Observable, Subject } from 'rxjs';
 import {
+    IAuthenticateWSRequest, IAuthenticateWSResponse,
     IGlobalWSRequestResponse,
     IMessageWSRequest,
     IMessageWSResponse,
@@ -23,6 +24,11 @@ export class SocketService {
     private dispatchMessage: Subject<IMessageWSResponse> = new Subject<IMessageWSResponse>();
 
     /**
+     * @description Signal for dispatching authorize messages
+     */
+    private dispatchAuthorize: Subject<IAuthenticateWSResponse> = new Subject<IAuthenticateWSResponse>();
+
+    /**
      * @description Timer for ping socket server
      */
     private timerPing: number = 0;
@@ -35,6 +41,12 @@ export class SocketService {
             .fromEvent<IGlobalWSRequestResponse<IMessageWSResponse>, string>('message')
             .subscribe((response) => {
                 this.dispatchMessage.next(response.payload);
+            });
+
+        this.socket
+            .fromEvent<IGlobalWSRequestResponse<IAuthenticateWSResponse>, string>('authorize')
+            .subscribe((response) => {
+                this.dispatchAuthorize.next(response.payload);
             });
 
         this.socket.fromEvent('connect').subscribe(() => {
@@ -96,6 +108,11 @@ export class SocketService {
     public listenMessage: Observable<IMessageWSResponse> = this.dispatchMessage.asObservable();
 
     /**
+     * @description Listen to the message from the socket server
+     */
+    public listenAuthorize: Observable<IAuthenticateWSResponse> = this.dispatchAuthorize.asObservable();
+
+    /**
      * @description Connect to the socket server
      */
     connect(): void {
@@ -110,6 +127,15 @@ export class SocketService {
     sendMessages(messages: IMessageWSRequest): void {
         const request: IGlobalWSRequestResponse<IMessageWSRequest> = {
             payload: messages,
+        };
+        this.socket.emit('message', request);
+    }
+
+    authenticate(token: string): void {
+        const request: IGlobalWSRequestResponse<IAuthenticateWSRequest> = {
+            payload: {
+                authToken: token,
+            },
         };
         this.socket.emit('message', request);
     }

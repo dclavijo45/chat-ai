@@ -41,6 +41,11 @@
     </div>
 
     <footer>
+        <i class="material-icons-outlined theme-color-icon" (click)="loginUser()"
+           [tp]="(userAuthenticated() ? 'chat.chat-list.logout': 'chat.chat-list.login') | translate" [tpIsLazy]="true" themeColor>
+            {{ userAuthenticated() ? 'logout' : 'login' }}
+        </i>
+
         <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()"
             [tp]="'chat.chat-list.toggle-theme' | translate" [tpIsLazy]="true" themeColor>
             {{ themeColor() == 'light' ? 'dark_mode' : 'light_mode' }}

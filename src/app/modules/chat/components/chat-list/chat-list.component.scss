@@ -180,7 +180,7 @@ main.dark {
 
 footer {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     justify-items: center;
     align-items: center;
 }
@@ -202,14 +202,6 @@ footer i {
     padding: 0.2rem;
     border-radius: 9999px;
     transition: background-color 100ms ease-in-out;
-}
-
-footer i:first-child {
-    justify-self: start;
-}
-
-footer i:last-child {
-    justify-self: end;
 }
 
 footer i.dark {

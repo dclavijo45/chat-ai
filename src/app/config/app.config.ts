@@ -20,6 +20,9 @@ import { markdownRendererFactory } from '../shared/factories/markdown-renderer.f
 import { providers } from './app.providers';
 import { routes } from './app.routes';
 import { popperVariation, provideTippyConfig, provideTippyLoader, tooltipVariation } from '@ngneat/helipopper/config';
+import {initializeApp, provideFirebaseApp} from "@angular/fire/app";
+import {getAuth, provideAuth} from "@angular/fire/auth";
+import {environment} from "../../environments/environtment";
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -34,6 +37,8 @@ export const appConfig: ApplicationConfig = {
                 useFactory: markdownRendererFactory
             },
         }),
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideAuth(() => getAuth()),
         provideTippyLoader(() => import('tippy.js')),
         provideTippyConfig({
             defaultVariation: 'tooltip',

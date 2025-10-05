@@ -3,9 +3,15 @@
         <div #historyList class="history-list scroll-1">
             @for (chat of chatHistory().history; track $index; let indexHistory = $index) {
                 @for (part of chat.parts; track $index) {
-                    <div class="chat-element">
-                        <img class="chat-element-img"
-                            src="/assets/img/{{chat.role == IHRole.user ? 'user.png' : 'logo.gif'}}"
+                    <div class="chat-element" [class.user]="chat.role == IHRole.user">
+                        <img class="chat-element-img" [class.rounded]="chat.role == IHRole.user" referrerpolicy="no-referrer"
+                            src="{{
+                            chat.role == IHRole.user ?
+                                userAuthenticated() ?
+                                    userAuthenticated()?.photoURL ? userAuthenticated()?.photoURL :
+                                        '/assets/img/user.png'
+                                : '/assets/img/user.png' :
+                                '/assets/img/logo.gif'}}"
                             [alt]="'chat.chat-history.user-photo' | translate" width="34" height="34">
 
                         @switch (part.type) {
@@ -19,12 +25,12 @@
                             @case (TypePartEnum.text) {
                                 @switch (chat.role) {
                                     @case (IHRole.user) {
-                                        <p class="chat-element-text" themeColor>{{part.text}}</p>
+                                        <p class="chat-element-text" [class.user]="chat.role == IHRole.user" themeColor>{{part.text}}</p>
                                     }
 
                                     @case (IHRole.model) {
                                         <markdown class="markdown" [lineNumbers]="true"
-                                            [data]="(chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()) || '...'"
+                                            [data]="(chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()) || 'chat.chat-history.waiting-message-ai' | translate"
                                             themeColor/>
                                     }
                                 }

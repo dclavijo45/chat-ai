@@ -22,6 +22,8 @@ import { ThemeColorService } from '../../../../shared/services/theme-color.servi
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
+import {AuthService} from "../../services/auth.service";
+import {User} from "@angular/fire/auth";
 
 @Component({
     selector: 'chat-list',
@@ -65,6 +67,11 @@ export class ChatListComponent {
      * @description Dialog service for managing modals and dialogs
      */
     private dialogService = inject(DialogService);
+
+    /**
+     * @description Service for managing authentication
+     */
+    private authService = inject(AuthService);
 
     /**
      * @description Change detector for the component
@@ -132,6 +139,13 @@ export class ChatListComponent {
      */
     get allowStoreChats(): boolean {
         return this.chatService.allowStoreChats();
+    }
+
+    /**
+     * @description Current authenticated user
+     */
+    get userAuthenticated(): Signal<User | null>{
+        return this.authService.listenUserAuthenticated;
     }
 
     /**
@@ -258,5 +272,16 @@ export class ChatListComponent {
      */
     setEngine(engine: AiEngineEnum): void {
         this.chatService.setAiEngine(engine);
+    }
+
+    /**
+     * @description Login user with Google or logout if already logged in
+     */
+    loginUser(): void {
+        if (this.authService.listenUserAuthenticated() === null) {
+            this.authService.loginWithGoogle();
+        } else {
+            this.authService.logout();
+        }
     }
 }
