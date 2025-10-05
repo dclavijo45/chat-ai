@@ -130,13 +130,4 @@ export class SocketService {
         };
         this.socket.emit('message', request);
     }
-
-    authenticate(token: string): void {
-        const request: IGlobalWSRequestResponse<IAuthenticateWSRequest> = {
-            payload: {
-                authToken: token,
-            },
-        };
-        this.socket.emit('message', request);
-    }
 }
