@@ -1,13 +1,13 @@
-import {afterNextRender, inject, Injectable, Signal, signal, WritableSignal,} from '@angular/core';
-import {IHRole, PartHistory, TypePartEnum} from '../interfaces/history.model';
+import { afterNextRender, inject, Injectable, Signal, signal, WritableSignal, } from '@angular/core';
+import { IHRole, PartHistory, TypePartEnum } from '../interfaces/history.model';
 
-import {TranslateService} from '@ngx-translate/core';
-import {NotifyService} from '../../../shared/services/notify.service';
-import {AiEngineEnum} from '../enums/ai-engine.enum';
-import {IChat} from '../interfaces/chat.model';
-import {StateMessageWSEnum} from '../interfaces/socket.model';
-import {SocketService} from './socket.service';
-import {AuthService} from "./auth.service";
+import { TranslateService } from '@ngx-translate/core';
+import { NotifyService } from '../../../shared/services/notify.service';
+import { AiEngineEnum } from '../enums/ai-engine.enum';
+import { IChat } from '../interfaces/chat.model';
+import { StateMessageWSEnum } from '../interfaces/socket.model';
+import { SocketService } from './socket.service';
+import { AuthService } from "./auth.service";
 
 @Injectable({
     providedIn: 'root',
@@ -132,8 +132,8 @@ export class ChatService {
                 if (!chatSelected) return;
 
                 chatSelected.history[
-                    chatSelected.history.length - 1
-                ].parts[0].text = JSON.parse(
+                chatSelected.history.length - 1
+                    ].parts[0].text = JSON.parse(
                     JSON.stringify(this.chatChunkStream())
                 );
 

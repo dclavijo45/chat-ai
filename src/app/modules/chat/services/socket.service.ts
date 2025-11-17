@@ -1,6 +1,6 @@
-import {inject, Injectable, Signal, signal, WritableSignal} from '@angular/core';
-import {Socket} from 'ngx-socket-io';
-import {Observable, Subject} from 'rxjs';
+import { inject, Injectable, Signal, signal, WritableSignal } from '@angular/core';
+import { Socket } from 'ngx-socket-io';
+import { Observable, Subject } from 'rxjs';
 import {
     IAuthenticateWSResponse,
     IGlobalWSRequestResponse,

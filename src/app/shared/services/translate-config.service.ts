@@ -30,20 +30,22 @@ export class TranslateConfigService {
             i18nConstant.LANGUAGES.map((language) => language.code)
         );
 
-        const browserLang = this.translateService.getBrowserLang();
-
-        if (i18nConstant.LANGUAGES.find((lang) => lang.code === browserLang)) {
-            this.translateService.use(browserLang!);
-        } else {
-            this.translateService.use(i18nConstant.DEFAULT_LANGUAGE.code);
-        }
-
         const language = this.cookieService.get(
             i18nConstant.LANGUAGE_STORAGE_KEY
         );
 
         if (language) {
             this.translateService.use(language);
+        }
+
+        if (!language) {
+            const browserLang = this.translateService.getBrowserLang();
+
+            if (i18nConstant.LANGUAGES.find((lang) => lang.code === browserLang)) {
+                this.translateService.use(browserLang!);
+            } else {
+                this.translateService.use(i18nConstant.DEFAULT_LANGUAGE.code);
+            }
         }
 
         this.translateService.onLangChange.subscribe((event) => {

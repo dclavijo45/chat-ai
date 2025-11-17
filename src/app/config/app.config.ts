@@ -20,13 +20,15 @@ import { markdownRendererFactory } from '../shared/factories/markdown-renderer.f
 import { providers } from './app.providers';
 import { routes } from './app.routes';
 import { popperVariation, provideTippyConfig, provideTippyLoader, tooltipVariation } from '@ngneat/helipopper/config';
-import {initializeApp, provideFirebaseApp} from "@angular/fire/app";
-import {getAuth, provideAuth} from "@angular/fire/auth";
-import {environment} from "../../environments/environtment";
+import { initializeApp, provideFirebaseApp } from "@angular/fire/app";
+import { getAuth, provideAuth } from "@angular/fire/auth";
+import { environment } from "../../environments/environtment";
+import { provideTranslateService } from "@ngx-translate/core";
+import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideZoneChangeDetection({ eventCoalescing: true }),
+        provideZoneChangeDetection({eventCoalescing: true}),
         provideRouter(routes),
         provideClientHydration(withIncrementalHydration(), withEventReplay()),
         importProvidersFrom(providers),
@@ -43,9 +45,17 @@ export const appConfig: ApplicationConfig = {
         provideTippyConfig({
             defaultVariation: 'tooltip',
             variations: {
-              tooltip: tooltipVariation,
-              popper: popperVariation,
+                tooltip: tooltipVariation,
+                popper: popperVariation,
             },
-          }),
+        }),
+        provideTranslateService({
+            loader: provideTranslateHttpLoader({
+                prefix: '/assets/i18n/',
+                suffix: '.json'
+            }),
+            fallbackLang: 'en',
+            lang: 'en'
+        })
     ],
 };

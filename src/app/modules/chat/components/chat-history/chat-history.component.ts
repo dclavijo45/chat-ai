@@ -13,34 +13,23 @@ import {
     viewChild,
     WritableSignal,
 } from '@angular/core';
-import {
-    FormControl,
-    FormsModule,
-    ReactiveFormsModule,
-    Validators,
-} from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { map } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { MarkdownModule } from 'ngx-markdown';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MarkdownComponent } from 'ngx-markdown';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
-import { TrimValidator } from '../../../../shared/form-validators/trim.validator';
 import { NotifyService } from '../../../../shared/services/notify.service';
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
-import {
-    IHRole,
-    PartHistory,
-    TypePartEnum,
-} from '../../interfaces/history.model';
+import { IHRole, PartHistory, TypePartEnum, } from '../../interfaces/history.model';
 import { IChatImage } from '../../interfaces/image.model';
-import { ToggleChunkChatPipe } from '../../pipes/toggleChunkChat.pipe';
 import { ChatService } from '../../services/chat.service';
 import { SocketService } from '../../services/socket.service';
-import {AuthService} from "../../services/auth.service";
-import {User} from "@angular/fire/auth";
+import { AuthService } from "../../services/auth.service";
+import { User } from "@angular/fire/auth";
 
 @Component({
     selector: 'chat-history',
@@ -48,10 +37,9 @@ import {User} from "@angular/fire/auth";
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        ToggleChunkChatPipe,
         ThemeColorDirective,
-        MarkdownModule,
-        TranslateModule,
+        TranslatePipe,
+        MarkdownComponent,
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
@@ -61,7 +49,6 @@ export class ChatHistoryComponent {
     constructor() {
         this.userInputPrompt = new FormControl<string | null>('', [
             Validators.required,
-            TrimValidator(),
         ]);
 
         this.chatHistory = signal({
@@ -74,7 +61,7 @@ export class ChatHistoryComponent {
             this.userInputPrompt.statusChanges.pipe(
                 map(() => this.userInputPrompt.valid)
             ),
-            { initialValue: this.userInputPrompt.valid }
+            {initialValue: this.userInputPrompt.valid}
         );
 
         this.canSendChat = computed(
@@ -91,7 +78,7 @@ export class ChatHistoryComponent {
             this.socketService.connect();
         });
 
-        const { aiEngine, chatList, chatSelect } =
+        const {aiEngine, chatList, chatSelect} =
             this.chatService;
 
         effect(() => {
@@ -257,6 +244,10 @@ export class ChatHistoryComponent {
             JSON.stringify(this.userInputPrompt.value)
         );
 
+        if (!userPrompt.trim()) {
+            return;
+        }
+
         this.userInputPrompt.reset();
 
         const parts: PartHistory[] = [];
@@ -341,7 +332,7 @@ export class ChatHistoryComponent {
      */
     async selectFiles(e: any): Promise<void> {
         const files = e.target.files as File[];
-        const maxFileSize = 1 * 1024 * 1024; // 1MB
+        const maxFileSize = 1024 * 1024; // 1MB
         const maxFiles = 10;
 
         if (!files.length) return;

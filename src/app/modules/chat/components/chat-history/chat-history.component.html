@@ -30,8 +30,8 @@
 
                                     @case (IHRole.model) {
                                         <markdown class="markdown" [lineNumbers]="true"
-                                            [data]="(chatHistory().history | toggleChunkChat : indexHistory: part : chatChunkStream()) || 'chat.chat-history.waiting-message-ai' | translate"
-                                            themeColor/>
+                                                  [data]="(part.text || chatChunkStream()) || ('chat.chat-history.waiting-message-ai' | translate)"
+                                                  themeColor/>
                                     }
                                 }
                             }

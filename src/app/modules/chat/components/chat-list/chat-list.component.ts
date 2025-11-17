@@ -1,16 +1,9 @@
-import {
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-    Component,
-    Signal,
-    afterNextRender,
-    inject
-} from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { DialogService } from '@ngneat/dialog';
 import { TippyDirective } from '@ngneat/helipopper';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ContextMenuModule } from '@perfectmemory/ngx-contextmenu';
 import { i18nConstant } from '../../../../shared/constants/i18n.constant';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
@@ -22,8 +15,8 @@ import { ThemeColorService } from '../../../../shared/services/theme-color.servi
 import { AiEngineEnum } from '../../enums/ai-engine.enum';
 import { IChat } from '../../interfaces/chat.model';
 import { ChatService } from '../../services/chat.service';
-import {AuthService} from "../../services/auth.service";
-import {User} from "@angular/fire/auth";
+import { AuthService } from "../../services/auth.service";
+import { User } from "@angular/fire/auth";
 
 @Component({
     selector: 'chat-list',
@@ -31,7 +24,7 @@ import {User} from "@angular/fire/auth";
         CommonModule,
         ThemeColorDirective,
         ContextMenuModule,
-        TranslateModule,
+        TranslatePipe,
         TippyDirective,
     ],
     templateUrl: `./chat-list.component.html`,
@@ -144,7 +137,7 @@ export class ChatListComponent {
     /**
      * @description Current authenticated user
      */
-    get userAuthenticated(): Signal<User | null>{
+    get userAuthenticated(): Signal<User | null> {
         return this.authService.listenUserAuthenticated;
     }
 

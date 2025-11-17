@@ -8,7 +8,7 @@ export const markdownRendererFactory = (): MarkedOptions => {
 
     renderer.link = (link): string => {
         const text = link.href.replace("https://", "").replace("http://", "");
-        return `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${text}</a>`;;
+        return `<a href="${link.href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
     };
     return {
         renderer,

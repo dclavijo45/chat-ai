@@ -33,19 +33,27 @@
                             "./node_modules/@perfectmemory/ngx-contextmenu/src/assets/stylesheets/base.scss",
                             "node_modules/simple-notify/dist/simple-notify.css",
                             "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.css",
-                            "node_modules/prism-themes/themes/prism-one-dark.min.css",
+                            "node_modules/prism-themes/themes/prism-night-owl.min.css",
                             "node_modules/prismjs/plugins/toolbar/prism-toolbar.min.css"
                         ],
                         "scripts": [
                             "node_modules/prismjs/prism.js",
                             "node_modules/prismjs/plugins/toolbar/prism-toolbar.min.js",
+                            "node_modules/prismjs/plugins/show-language/prism-show-language.min.js",
                             "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.min.js",
                             "node_modules/prismjs/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js",
                             "node_modules/prismjs/components/prism-typescript.min.js",
                             "node_modules/prismjs/components/prism-javascript.min.js",
                             "node_modules/prismjs/components/prism-python.min.js",
-                            "node_modules/prismjs/components/prism-java.min.js"
-
+                            "node_modules/prismjs/components/prism-java.min.js",
+                            "node_modules/prismjs/components/prism-yaml.min.js",
+                            "node_modules/prismjs/components/prism-sql.min.js",
+                            "node_modules/prismjs/components/prism-regex.min.js",
+                            "node_modules/prismjs/components/prism-nginx.min.js",
+                            "node_modules/prismjs/components/prism-mongodb.min.js",
+                            "node_modules/prismjs/components/prism-makefile.min.js",
+                            "node_modules/prismjs/components/prism-log.min.js",
+                            "node_modules/prismjs/components/prism-json.min.js"
                         ],
                         "server": "src/main.server.ts",
                         "prerender": true,
