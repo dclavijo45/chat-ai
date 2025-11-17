@@ -4,33 +4,33 @@
             @for (chat of chatHistory().history; track $index; let indexHistory = $index) {
                 @for (part of chat.parts; track $index) {
                     <div class="chat-element" [class.user]="chat.role == IHRole.user">
-                        <img class="chat-element-img" [class.rounded]="chat.role == IHRole.user" referrerpolicy="no-referrer"
-                            src="{{
+                        <img class="chat-element-img" [class.rounded]="chat.role == IHRole.user"
+                             referrerpolicy="no-referrer"
+                             src="{{
                             chat.role == IHRole.user ?
                                 userAuthenticated() ?
                                     userAuthenticated()?.photoURL ? userAuthenticated()?.photoURL :
                                         '/assets/img/user.png'
                                 : '/assets/img/user.png' :
                                 '/assets/img/logo.gif'}}"
-                            [alt]="'chat.chat-history.user-photo' | translate" width="34" height="34">
+                             [alt]="'chat.chat-history.user-photo' | translate" width="34" height="34">
 
                         @switch (part.type) {
                             @case (TypePartEnum.image) {
                                 <img class="chat-element-img-user"
-                                    [src]="part.text"
-                                    [alt]="'chat.chat-history.img-selected-by-user' | translate"
-                                    width="150">
+                                     [src]="part.text"
+                                     [alt]="'chat.chat-history.img-selected-by-user' | translate"
+                                     width="150">
                             }
-
                             @case (TypePartEnum.text) {
                                 @switch (chat.role) {
                                     @case (IHRole.user) {
-                                        <p class="chat-element-text" [class.user]="chat.role == IHRole.user" themeColor>{{part.text}}</p>
+                                        <p class="chat-element-text" [class.user]="chat.role == IHRole.user"
+                                           themeColor>{{ part.text }}</p>
                                     }
-
                                     @case (IHRole.model) {
                                         <markdown class="markdown" [lineNumbers]="true"
-                                                  [data]="(part.text || chatChunkStream()) || ('chat.chat-history.waiting-message-ai' | translate)"
+                                                  [data]="(part.text || (chatChunkStream | async)) || ('chat.chat-history.waiting-message-ai' | translate)"
                                                   themeColor/>
                                     }
                                 }
@@ -56,9 +56,9 @@
             @for (image of imagesList(); track $index) {
                 <div class="image-selected-box" (click)="removeImage(image)">
                     <img class="image-selected"
-                        [src]="image.base64"
-                        [alt]="('chat.chat-history.img-selected-by-user' | translate) + ': ' + image.name"
-                        width="45" height="45">
+                         [src]="image.base64"
+                         [alt]="('chat.chat-history.img-selected-by-user' | translate) + ': ' + image.name"
+                         width="45" height="45">
                     <i class="material-icons-outlined delete-image-icon">delete</i>
                 </div>
             }
@@ -66,18 +66,25 @@
 
         <div class="input-manage" [class.images]="imagesList().length">
             <i class="material-icons-outlined input-icon select-files-icon" (click)="loadImages(inputFile)"
-                [class.active]="userInputPrompt.valid" themeColor>add_photo_alternate</i>
+               [class.active]="userInputPrompt.valid" themeColor>add_photo_alternate</i>
+
+            <i class="material-icons-outlined input-icon auto-scroll-icon no-select"
+               [tp]="(autoScrollChatHistory() ? 'chat.chat-history.auto-scroll-chat-history-enabled'
+                    : 'chat.chat-history.auto-scroll-chat-history-disabled') | translate" [tpIsLazy]="true"
+               (click)="toggleAutoScrollSetting()">
+                {{ autoScrollChatHistory() ? 'filter_list' : 'remove' }}
+            </i>
 
             <input #inputFile type="file" (change)="selectFiles($event)"
-                accept=".png, .jpeg, .jpg, .webp, .gif"
-                multiple>
+                   accept=".png, .jpeg, .jpg, .webp, .gif"
+                   multiple>
 
             <textarea (keydown.enter)="sendMessage($event)" [formControl]="userInputPrompt"
-                [placeholder]="'chat.chat-history.send-a-message' | translate"
-                class="scroll-1" themeColor autofocus></textarea>
+                      [placeholder]="'chat.chat-history.send-a-message' | translate"
+                      class="scroll-1" themeColor autofocus></textarea>
 
             <i class="material-icons-outlined input-icon" (click)="sendMessage($event)"
-                [class.active]="canSendChat()" themeColor>arrow_upward</i>
+               [class.active]="canSendChat()" themeColor>arrow_upward</i>
         </div>
     </div>
 </main>

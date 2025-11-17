@@ -270,11 +270,14 @@ export class ChatListComponent {
     /**
      * @description Login user with Google or logout if already logged in
      */
-    loginUser(): void {
-        if (this.authService.listenUserAuthenticated() === null) {
-            this.authService.loginWithGoogle();
-        } else {
-            this.authService.logout();
-        }
+    login(): void {
+        this.authService.loginWithGoogle();
+    }
+
+    /**
+     * @description Logout user
+     */
+    logout(): void {
+        this.authService.logout();
     }
 }

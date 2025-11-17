@@ -215,3 +215,15 @@ footer i:hover {
 footer i.dark:hover {
     background-color: #2f2f2f;
 }
+
+.img-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: filter 150ms ease-in-out;
+}
+
+.img-avatar:hover {
+    filter: brightness(80%);
+}

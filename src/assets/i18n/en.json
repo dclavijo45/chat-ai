@@ -35,7 +35,9 @@
             "current-model-not-support-img" : "The current AI model does not support images",
             "support-max-files-number": "Only maximum {{maxFiles}} images are allowed",
             "image-size-exceeds-limit": "The image {{fileName}} exceeds the maximum size ({{maxFileSize}}MB)",
-            "waiting-message-ai": "..."
+            "waiting-message-ai": "...",
+            "auto-scroll-chat-history-enabled": "Disable chat auto scroll",
+            "auto-scroll-chat-history-disabled": "Enable chat auto scroll"
         }
     }
 }

@@ -41,10 +41,17 @@
     </div>
 
     <footer>
-        <i class="material-icons-outlined theme-color-icon" (click)="loginUser()"
-           [tp]="(userAuthenticated() ? 'chat.chat-list.logout': 'chat.chat-list.login') | translate" [tpIsLazy]="true" themeColor>
-            {{ userAuthenticated() ? 'logout' : 'login' }}
-        </i>
+        @if (userAuthenticated()) {
+            <img [src]="userAuthenticated()?.photoURL" alt="user avatar logged"
+                 class="img-avatar"
+                 [tp]="'chat.chat-list.logout' | translate" [tpIsLazy]="true"
+                 tpPlacement="right" (click)="logout()">
+        } @else {
+            <i class="material-icons-outlined theme-color-icon" (click)="login()"
+               [tp]="'chat.chat-list.login' | translate" [tpIsLazy]="true" themeColor>
+                login
+            </i>
+        }
 
         <i class="material-icons-outlined theme-color-icon" (click)="toggleThemeColor()"
             [tp]="'chat.chat-list.toggle-theme' | translate" [tpIsLazy]="true" themeColor>

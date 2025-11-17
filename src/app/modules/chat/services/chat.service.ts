@@ -8,6 +8,7 @@ import { IChat } from '../interfaces/chat.model';
 import { StateMessageWSEnum } from '../interfaces/socket.model';
 import { SocketService } from './socket.service';
 import { AuthService } from "./auth.service";
+import { Observable, Subject } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +20,7 @@ export class ChatService {
         afterNextRender(() => {
             this.loadStoredChats();
             this.getPermissionStoreChats();
+            this.getAutoScrollChatHistorySetting();
         });
     }
 
@@ -65,14 +67,19 @@ export class ChatService {
     private dpIsStreaming: WritableSignal<boolean> = signal<boolean>(false);
 
     /**
-     * @description Signal to get chat chunk
+     * @description Subject observable to get chat chunk
      */
-    private dpChatChunkStream: WritableSignal<string> = signal<string>('');
+    private dpChatChunkStream: Subject<string> = new Subject<string>();
 
     /**
      * @description Signal to get permission to store chats from local storage
      */
     private dpAllowStoreChats: WritableSignal<boolean> = signal<boolean>(false);
+
+    /**
+     * @description Signal to auto scroll chat history
+     */
+    private dpAutoScrollChatHistory: WritableSignal<boolean> = signal<boolean>(true);
 
     /**
      * @description Readonly signal for the current chat id selected
@@ -99,8 +106,7 @@ export class ChatService {
     /**
      * @description Readonly signal for the current chat chunk
      */
-    public readonly chatChunkStream: Signal<string> =
-        this.dpChatChunkStream.asReadonly();
+    public readonly chatChunkStream: Observable<string> = this.dpChatChunkStream.asObservable();
 
     /**
      * @description Readonly signal for the current permission to store chats
@@ -109,13 +115,21 @@ export class ChatService {
         this.dpAllowStoreChats.asReadonly();
 
     /**
+     * @description Readonly signal for the current auto scroll chat history
+     */
+    public readonly autoScrollChatHistory: Signal<boolean> =
+        this.dpAutoScrollChatHistory.asReadonly();
+
+    /**
      * @description Listen message from socket service
      */
     private listenMessage(): void {
+        let tmpChatChunk = '';
+
         this.socketService.listenMessage.subscribe((message) => {
-            this.dpChatChunkStream.update(
-                (chunk) => chunk + message.messageChunk
-            );
+            tmpChatChunk += message.messageChunk;
+
+            this.dpChatChunkStream.next(tmpChatChunk);
 
             if (message.state == StateMessageWSEnum.STREAMING) {
                 return;
@@ -134,10 +148,11 @@ export class ChatService {
                 chatSelected.history[
                 chatSelected.history.length - 1
                     ].parts[0].text = JSON.parse(
-                    JSON.stringify(this.chatChunkStream())
+                    JSON.stringify(tmpChatChunk)
                 );
 
-                this.dpChatChunkStream.set('');
+                this.dpChatChunkStream.next('');
+                tmpChatChunk = '';
                 this.saveChatsStorage();
             }
         });
@@ -159,6 +174,26 @@ export class ChatService {
         const allowStoreChats = localStorage.getItem('allowStoreChats');
 
         this.dpAllowStoreChats.set(allowStoreChats == '1');
+    }
+
+    /**
+     * @description Get auto scroll chat history setting from local storage
+     */
+    private getAutoScrollChatHistorySetting(): void {
+        const autoScrollChatHistory = localStorage.getItem('autoScrollChatHistory');
+
+        this.dpAutoScrollChatHistory.set(autoScrollChatHistory !== '0');
+    }
+
+    /**
+     * @description Toggle auto scroll chat history setting
+     */
+    toggleAutoScrollChatHistorySetting(): void {
+        const currentSetting = this.autoScrollChatHistory();
+
+        this.dpAutoScrollChatHistory.set(!currentSetting);
+
+        localStorage.setItem('autoScrollChatHistory', this.dpAutoScrollChatHistory() ? '1' : '0');
     }
 
     /**

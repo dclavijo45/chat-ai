@@ -157,8 +157,7 @@ main.dark {
 
 .input-manage {
     display: grid;
-    grid-template-columns: 40px 1fr 40px;
-    gap: 10px;
+    grid-template-columns: 40px 40px 1fr 40px;
 }
 
 .input-manage.images {
@@ -218,6 +217,10 @@ textarea.dark {
 }
 
 .input-icon.active:hover {
+    cursor: pointer;
+}
+
+.auto-scroll-icon {
     cursor: pointer;
 }
 

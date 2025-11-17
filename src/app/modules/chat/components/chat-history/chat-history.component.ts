@@ -14,10 +14,10 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule, Validators, } from '@angular/forms';
-import { map } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 import { CommonModule } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MarkdownComponent } from 'ngx-markdown';
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
@@ -30,6 +30,7 @@ import { ChatService } from '../../services/chat.service';
 import { SocketService } from '../../services/socket.service';
 import { AuthService } from "../../services/auth.service";
 import { User } from "@angular/fire/auth";
+import { TippyDirective } from "@ngneat/helipopper";
 
 @Component({
     selector: 'chat-history',
@@ -40,6 +41,7 @@ import { User } from "@angular/fire/auth";
         ThemeColorDirective,
         TranslatePipe,
         MarkdownComponent,
+        TippyDirective,
     ],
     templateUrl: `./chat-history.component.html`,
     styleUrl: './chat-history.component.scss',
@@ -128,9 +130,17 @@ export class ChatHistoryComponent {
             }
 
             setTimeout(() => {
-                this.scrollHistory(true);
+                this.scrollHistory();
             }, 100);
         });
+
+        this.chatChunkStream.pipe(
+            takeUntilDestroyed()
+        ).subscribe(chunk => {
+            if (chunk) {
+                this.scrollHistory();
+            }
+        })
     }
 
     /**
@@ -182,9 +192,11 @@ export class ChatHistoryComponent {
     chatHistory: WritableSignal<IChat>;
 
     /**
-     * @description Chat chunk stream signal to manage the chat chunk stream
+     * @description Chat chunk stream to manage the chat chunk stream
      */
-    chatChunkStream: Signal<string> = this.chatService.chatChunkStream
+    get chatChunkStream(): Observable<string> {
+        return this.chatService.chatChunkStream;
+    }
 
     /**
      * @description User input prompt form control
@@ -220,6 +232,11 @@ export class ChatHistoryComponent {
      * @description Flag if the server is connected
      */
     isServerConnected: Signal<boolean> = this.socketService.isConnected;
+
+    /**
+     * @description Flag to auto scroll the chat history list when a new stream-message is received
+     */
+    autoScrollChatHistory: Signal<boolean> = this.chatService.autoScrollChatHistory;
 
     /**
      * @description Send message to the chat server
@@ -277,29 +294,23 @@ export class ChatHistoryComponent {
         }
 
         setTimeout(() => {
-            this.scrollHistory(true);
+            this.scrollHistory();
         }, 100);
     }
 
     /**
      * @description Scroll to the bottom of the chat history list
-     * @param inmediatly Flag to scroll inmediatly to the bottom
      */
-    scrollHistory(inmediatly: boolean = false): void {
+    scrollHistory(): void {
         const historyListElement = this.historyList()?.nativeElement;
 
         if (!historyListElement) return;
 
-        const isAtBottom =
-            historyListElement.scrollTop + historyListElement.clientHeight >=
-            historyListElement.scrollHeight * 0.9;
+        if (!this.autoScrollChatHistory()) return;
 
-        if (inmediatly || isAtBottom) {
-            historyListElement.scrollTo({
-                top: historyListElement.scrollHeight,
-                behavior: 'smooth',
-            });
-        }
+        historyListElement.scrollTo({
+            top: historyListElement.scrollHeight
+        });
     }
 
     /**
@@ -411,5 +422,12 @@ export class ChatHistoryComponent {
 
             return imgList;
         });
+    }
+
+    /**
+     * @description Toggle the auto scroll chat history setting
+     */
+    toggleAutoScrollSetting(): void {
+        this.chatService.toggleAutoScrollChatHistorySetting();
     }
 }
