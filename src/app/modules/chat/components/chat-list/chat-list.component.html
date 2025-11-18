@@ -45,7 +45,8 @@
             <img [src]="userAuthenticated()?.photoURL" alt="user avatar logged"
                  class="img-avatar"
                  [tp]="'chat.chat-list.logout' | translate" [tpIsLazy]="true"
-                 tpPlacement="right" (click)="logout()">
+                 tpPlacement="right" (click)="logout()"
+            referrerpolicy="no-referrer">
         } @else {
             <i class="material-icons-outlined theme-color-icon" (click)="login()"
                [tp]="'chat.chat-list.login' | translate" [tpIsLazy]="true" themeColor>

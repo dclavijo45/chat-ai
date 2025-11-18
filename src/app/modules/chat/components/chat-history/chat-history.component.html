@@ -1,7 +1,7 @@
 <main themeColor>
     <div class="chat-list">
         <div #historyList class="history-list scroll-1">
-            @for (chat of chatHistory().history; track $index; let indexHistory = $index) {
+            @for (chat of chatHistory().history; track $index) {
                 @for (part of chat.parts; track $index) {
                     <div class="chat-element" [class.user]="chat.role == IHRole.user">
                         <img class="chat-element-img" [class.rounded]="chat.role == IHRole.user"

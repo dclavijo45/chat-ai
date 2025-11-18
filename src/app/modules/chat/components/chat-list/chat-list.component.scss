@@ -1,4 +1,7 @@
 main {
+    display: grid;
+    grid-template-rows: 120px 1fr 40px;
+    gap: 1.5rem;
     padding: 1rem 0.7rem;
     height: 100%;
     background-color: var(--color-3);
@@ -14,7 +17,7 @@ main.dark {
     display: grid;
     grid-template-rows: 2fr;
     grid-template-columns: 1fr;
-    height: 120px;
+    height: 100%;
     align-items: center;
     padding: 0.2rem 0.5rem;
     background-color: transparent;
@@ -37,8 +40,7 @@ main.dark {
 
 .logo {
     width: max-content;
-    transition: filter 100ms ease-in-out;
-    transition: box-shadow 100ms ease-in-out;
+    transition: filter 100ms ease-in-out, box-shadow 100ms ease-in-out;
     border-radius: 5px;
     filter: grayscale(1);
 }
@@ -102,10 +104,9 @@ main.dark {
 }
 
 .chat-list {
-    margin-top: 1.5rem;
     font-size: 14px;
     overflow-y: auto;
-    height: calc(var(--vh) * 73);
+    height: 100%;
 }
 
 .chat-list-title {
@@ -130,8 +131,7 @@ main.dark {
     white-space: nowrap;
     text-overflow: ellipsis;
     border-radius: 0.5rem;
-    transition: background-color 100ms ease-in-out;
-    transition: color 100ms ease-in-out;
+    transition: background-color 100ms ease-in-out, color 100ms ease-in-out;
 }
 
 .chat-element .delete-btn {

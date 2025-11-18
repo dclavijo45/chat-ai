@@ -19,7 +19,7 @@ main.dark {
     display: grid;
     grid-area: chat_list;
     align-items: start;
-    width: 700px;
+    width: 800px;
 }
 
 .start {
@@ -108,7 +108,7 @@ main.dark {
     grid-template-rows: 1fr;
     gap: 5px;
     padding: 1rem;
-    width: 700px;
+    width: 800px;
     border: 1px solid rgb(155, 155, 155);
     border-radius: 1rem;
     min-height: 50px;
@@ -251,11 +251,28 @@ input[type=file] {
 }
 
 @media (max-width: 1000px) {
+    .chat-element-img {
+        display: none;
+    }
+
+    .chat-element-img-user {
+        display: none;
+    }
+
+    .chat-element {
+        grid-template-columns: 1fr;
+    }
+
+    .chat-element.user {
+        grid-template-columns: 1fr;
+    }
+
     .input-user {
-        width: 90%;
+        width: 95%;
+        margin-top: 1rem;
     }
 
     .chat-list {
-        width: 90%;
+        width: 95%;
     }
 }
