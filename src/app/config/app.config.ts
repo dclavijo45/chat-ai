@@ -1,7 +1,7 @@
 import {
     ApplicationConfig,
     importProvidersFrom,
-    provideZoneChangeDetection,
+    provideZoneChangeDetection, provideZonelessChangeDetection,
 } from '@angular/core';
 
 import {
@@ -28,7 +28,7 @@ import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
 
 export const appConfig: ApplicationConfig = {
     providers: [
-        provideZoneChangeDetection({eventCoalescing: true}),
+        provideZonelessChangeDetection(),
         provideRouter(routes),
         provideClientHydration(withIncrementalHydration(), withEventReplay()),
         importProvidersFrom(providers),

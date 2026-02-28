@@ -108,11 +108,6 @@ export class SocketService {
     public listenMessage: Observable<IMessageWSResponse> = this.dispatchMessage.asObservable();
 
     /**
-     * @description Listen to the message from the socket server
-     */
-    public listenAuthorize: Observable<IAuthenticateWSResponse> = this.dispatchAuthorize.asObservable();
-
-    /**
      * @description Connect to the socket server
      */
     connect(): void {
