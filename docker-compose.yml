@@ -1,11 +1,21 @@
 services:
-  app:
+  chat-ai-dclavijo45:
     build:
       context: .
-    restart: unless-stopped
-    container_name: chat-ai-frontend
-    ports:
-      - "127.0.0.1:3001:3001"
+    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
+    expose:
+      - ${PORT}
     environment:
       - NODE_ENV=production
-      - PORT=3001
+      - PORT=${PORT}
+    networks:
+      - cloudflared
+
+networks:
+  cloudflared:
+    external: true
+
