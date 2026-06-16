@@ -1,6 +1,6 @@
 import { afterNextRender, ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Signal } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+
 import { DialogService } from '@ngneat/dialog';
 import { TippyDirective } from '@ngneat/helipopper';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,12 +21,11 @@ import { User } from "@angular/fire/auth";
 @Component({
     selector: 'chat-list',
     imports: [
-        CommonModule,
-        ThemeColorDirective,
-        ContextMenuModule,
-        TranslatePipe,
-        TippyDirective,
-    ],
+    ThemeColorDirective,
+    ContextMenuModule,
+    TranslatePipe,
+    TippyDirective
+],
     templateUrl: `./chat-list.component.html`,
     styleUrl: './chat-list.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,16 +1,18 @@
-FROM node:24.0.0 AS build
+FROM node:26.0.0 AS build
 
 WORKDIR /app
 
-COPY package*.json ./
+RUN npm install -g pnpm@11.1.1
 
-RUN npm install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN npm run build
+RUN pnpm build
 
-FROM node:24.0.0-alpine
+FROM node:26.0.0-alpine
 
 WORKDIR /app
 

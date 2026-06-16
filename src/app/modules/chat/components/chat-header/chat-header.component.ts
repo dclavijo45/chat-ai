@@ -1,14 +1,13 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, output, Output, OutputEmitterRef, signal, WritableSignal } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+
 import { ThemeColorDirective } from '../../../../shared/directives/theme-color.directive';
 
 @Component({
     selector: 'chat-header',
     imports: [
-        CommonModule,
-        ThemeColorDirective
-    ],
+    ThemeColorDirective
+],
     templateUrl: './chat-header.component.html',
     styleUrl: './chat-header.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

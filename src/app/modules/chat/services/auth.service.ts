@@ -1,6 +1,6 @@
 import {inject, Injectable, signal} from "@angular/core";
 import {Auth, onAuthStateChanged, signInWithPopup, signOut, User} from "@angular/fire/auth";
-import {GoogleAuthProvider} from '@firebase/auth';
+import { GoogleAuthProvider } from 'firebase/auth';
 
 @Injectable({
     providedIn: 'root',
